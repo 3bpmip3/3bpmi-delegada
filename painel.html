@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel - 3º BPM/I (DELEGADA)</title>
+    <style>
+        :root {
+            --dourado: #d4a017;
+            --dark-bg: #1a1a1a;
+            --sidebar-item: #333;
+            --bg-body: #f4f4f4;
+            --sucesso: #27ae60;
+            --erro: #c0392b;
+            --azul-edit: #3498db;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; background: var(--bg-body); height: 100vh; overflow: hidden; }
+
+        .sidebar { width: 260px; background: var(--dark-bg); color: white; display: flex; flex-direction: column; padding: 20px 0; box-shadow: 2px 0 10px rgba(0,0,0,0.3); }
+        .sidebar-header { text-align: center; padding-bottom: 20px; border-bottom: 1px solid var(--sidebar-item); }
+        .sidebar-header img { width: 100px; }
+        .menu-item { padding: 15px 25px; color: #bdc3c7; cursor: pointer; transition: 0.3s; border-left: 4px solid transparent; }
+        .menu-item:hover { background: var(--sidebar-item); color: var(--dourado); border-left: 4px solid var(--dourado); }
+
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; }
+        .header { background: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .content-area { padding: 30px; overflow-y: auto; flex-grow: 1; }
+        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+
+        .subtitle { 
+            color: #2c3e50; margin-bottom: 25px; font-weight: 700; font-size: 1.6rem; 
+            border-left: 8px solid var(--dourado); padding-left: 20px; text-transform: uppercase;
+        }
+
+        .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #e0e0e0; padding: 15px; border-radius: 8px; }
+        .btn-nova { background: var(--sucesso); color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-sync { background: #8e44ad; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
+        select { padding: 10px; border-radius: 4px; font-weight: 600; }
+
+        .delegada-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .delegada-table th, .delegada-table td { 
+            border: 1px solid #ddd; padding: 10px 5px; text-align: center; vertical-align: middle; word-wrap: break-word;
+        }
+        .delegada-table th { background: var(--dark-bg); color: var(--dourado); font-size: 0.7rem; text-transform: uppercase; }
+
+        .col-data { width: 18%; }
+        .col-id { width: 10%; }
+        .col-turno { width: 15%; }
+        .col-desc { width: 22%; }
+        .col-qtd { width: 8%; }
+        .col-acoes { width: 12%; }
+
+        .day-row { background-color: #f9f9f9; font-weight: bold; }
+        .weekday-label { display: block; font-size: 0.75rem; color: #666; font-weight: normal; margin-top: 4px; }
+        .weekend { background-color: #fff0f0; }
+
+        .btn-edit { background: var(--azul-edit); color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
+        .btn-delete { background: var(--erro); color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
+
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 30px; border-radius: 10px; width: 450px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        
+        #loading-msg { font-weight: bold; color: var(--sucesso); display: none; margin-left: 10px; }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <img src="Brasão 3BC.png" alt="Brasão">
+        <h3>SISTEMA 3º BPM/I</h3>
+    </div>
+    <nav>
+        <div class="menu-item" onclick="showDashboard()">Início</div>
+        <div class="menu-item" onclick="showDelegada()">Atividade DELEGADA</div>
+    </nav>
+</aside>
+
+<main class="main-content">
+    <header class="header">
+        <h2 id="page-title">Painel Geral</h2>
+        <div>
+            <span id="loading-msg">Sincronizando Nuvem...</span>
+            <button onclick="logout()" style="background:var(--erro); color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">SAIR</button>
+        </div>
+    </header>
+    <section class="content-area">
+        <div id="dynamic-content" class="card"></div>
+    </section>
+</main>
+
+<div id="modalEscala" class="modal">
+    <div class="modal-content">
+        <h3 id="modal-title">Nova Escala</h3>
+        <form id="formEscala">
+            <input type="hidden" id="edit-index">
+            <div class="form-group"><label>Data:</label><input type="date" id="esc-data" required></div>
+            <div style="display:flex; gap:10px;">
+                <div class="form-group" style="flex:1;"><label>Início:</label><input type="time" id="esc-inicio" oninput="calcularTermino()" required></div>
+                <div class="form-group" style="flex:1;"><label>Término (8h):</label><input type="time" id="esc-termino" readonly style="background:#eee;"></div>
+            </div>
+            <div class="form-group"><label>ID Escala:</label><input type="text" id="esc-id" required></div>
+            <div class="form-group"><label>Descrição:</label><input type="text" id="esc-desc" required></div>
+            <div style="display:flex; gap:10px;">
+                <div class="form-group" style="flex:1;"><label>Qtd Oficiais:</label><input type="number" id="esc-oficiais" min="0" value="0"></div>
+                <div class="form-group" style="flex:1;"><label>Qtd Praças:</label><input type="number" id="esc-pracas" min="0" value="0"></div>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" onclick="fecharModal()" style="padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">Cancelar</button>
+                <button type="submit" class="btn-nova" id="btn-salvar">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0DEA_FZQfJ2fWh00727YdGP47g1Vs1pzqu9ZYbzErJoZPkExEwtIawu2Be6NCoIX2wg/exec';
+
+    let escalasBD = JSON.parse(localStorage.getItem('escalas_delegada')) || [];
+    const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    const diasSemana = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
+
+    async function loadFromSheets() {
+        const msg = document.getElementById('loading-msg');
+        if(msg) msg.style.display = 'inline';
+        try {
+            const response = await fetch(SCRIPT_URL);
+            const data = await response.json();
+            if (data && Array.isArray(data)) {
+                escalasBD = data;
+                localStorage.setItem('escalas_delegada', JSON.stringify(escalasBD));
+            }
+        } catch (e) { console.error("Erro ao carregar do Sheets:", e); }
+        if(msg) msg.style.display = 'none';
+        generateDelegadaList();
+    }
+
+    async function syncToSheets() {
+        document.getElementById('loading-msg').style.display = 'inline';
+        try {
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(escalasBD)
+            });
+        } catch (e) { console.error("Erro ao sincronizar:", e); }
+        document.getElementById('loading-msg').style.display = 'none';
+    }
+
+    function showDashboard() {
+        document.getElementById('page-title').innerText = "Início";
+        document.getElementById('dynamic-content').innerHTML = `<h3>Bem-vindo</h3><p>Os dados são atualizados automaticamente com o Google Sheets.</p>`;
+    }
+
+    async function showDelegada() {
+        document.getElementById('page-title').innerText = "Atividade DELEGADA";
+        document.getElementById('dynamic-content').innerHTML = `
+            <div id="delegada-subtitle" class="subtitle">Sincronizando...</div>
+            <div class="controls">
+                <div>
+                    <select id="sel-ano" onchange="generateDelegadaList()"><option value="2026">2026</option><option value="2027">2027</option></select>
+                    <select id="sel-mes" onchange="generateDelegadaList()">${nomesMeses.map((m, i) => `<option value="${i}" ${i===new Date().getMonth()?'selected':''}>${m}</option>`).join('')}</select>
+                </div>
+                <button class="btn-nova" onclick="abrirModal()">+ Criar Nova Escala</button>
+            </div>
+            <div id="delegada-list-container">Carregando tabela...</div>
+        `;
+        // Carrega dados da nuvem e desenha a tabela
+        await loadFromSheets();
+    }
+
+    function generateDelegadaList() {
+        const container = document.getElementById('delegada-list-container');
+        if(!container) return;
+
+        const mesIdx = parseInt(document.getElementById('sel-mes').value);
+        const ano = parseInt(document.getElementById('sel-ano').value);
+        document.getElementById('delegada-subtitle').innerText = `Ano de ${ano} - ${nomesMeses[mesIdx]}`;
+        
+        const diasNoMes = new Date(ano, mesIdx + 1, 0).getDate();
+        
+        let html = `<table class="delegada-table"><thead><tr>
+            <th class="col-data">Data</th><th class="col-id">ID</th><th class="col-turno">Turno</th>
+            <th class="col-desc">Descrição</th><th class="col-qtd">Of.</th><th class="col-qtd">Pr.</th>
+            <th class="col-acoes">Ações</th>
+        </tr></thead><tbody>`;
+
+        for (let d = 1; d <= diasNoMes; d++) {
+            const dataObj = new Date(ano, mesIdx, d);
+            const diaNome = diasSemana[dataObj.getDay()];
+            const isWeekend = [0,6].includes(dataObj.getDay());
+            
+            // Formatamos a data para comparar com o banco (YYYY-MM-DD)
+            const dataIso = `${ano}-${(mesIdx+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
+            const dataExibicao = `${d.toString().padStart(2,'0')}/${(mesIdx+1).toString().padStart(2,'0')}/${ano}`;
+            
+            const escalasDoDia = escalasBD.filter(e => e.data === dataIso);
+
+            if (escalasDoDia.length === 0) {
+                html += `<tr class="${isWeekend?'weekend':''}">
+                    <td class="day-row">${dataExibicao}<span class="weekday-label">${diaNome}</span></td>
+                    <td colspan="5" style="color:#bbb;">-</td><td>-</td>
+                </tr>`;
+            } else {
+                escalasDoDia.forEach((esc, idx) => {
+                    const globalIdx = escalasBD.indexOf(esc);
+                    html += `<tr class="${isWeekend?'weekend':''}">
+                        ${idx===0?`<td rowspan="${escalasDoDia.length}" class="day-row">${dataExibicao}<span class="weekday-label">${diaNome}</span></td>`:''}
+                        <td>${esc.id}</td>
+                        <td>${esc.inicio} - ${esc.termino}</td>
+                        <td>${esc.desc}</td>
+                        <td>${esc.oficiais}</td>
+                        <td>${esc.pracas}</td>
+                        <td>
+                            <button class="btn-edit" onclick="editarEscala(${globalIdx})">E</button>
+                            <button class="btn-delete" onclick="excluirEscala(${globalIdx})">X</button>
+                        </td>
+                    </tr>`;
+                });
+            }
+        }
+        container.innerHTML = html + '</tbody></table>';
+    }
+
+    function abrirModal(index = -1) {
+        document.getElementById('modalEscala').style.display = 'flex';
+        document.getElementById('formEscala').reset();
+        document.getElementById('edit-index').value = index;
+        if(index !== -1) {
+            const e = escalasBD[index];
+            document.getElementById('modal-title').innerText = "Editar Escala";
+            document.getElementById('esc-data').value = e.data;
+            document.getElementById('esc-inicio').value = e.inicio;
+            document.getElementById('esc-termino').value = e.termino;
+            document.getElementById('esc-id').value = e.id;
+            document.getElementById('esc-desc').value = e.desc;
+            document.getElementById('esc-oficiais').value = e.oficiais;
+            document.getElementById('esc-pracas').value = e.pracas;
+        }
+    }
+
+    function fecharModal() { document.getElementById('modalEscala').style.display = 'none'; }
+
+    function calcularTermino() {
+        const inicio = document.getElementById('esc-inicio').value;
+        if (!inicio) return;
+        let [h, m] = inicio.split(':').map(Number);
+        h = (h + 8) % 24;
+        document.getElementById('esc-termino').value = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+    }
+
+    document.getElementById('formEscala').onsubmit = async function(e) {
+        e.preventDefault();
+        const index = document.getElementById('edit-index').value;
+        const dados = {
+            data: document.getElementById('esc-data').value,
+            inicio: document.getElementById('esc-inicio').value,
+            termino: document.getElementById('esc-termino').value,
+            id: document.getElementById('esc-id').value,
+            desc: document.getElementById('esc-desc').value,
+            pracas: document.getElementById('esc-pracas').value,
+            oficiais: document.getElementById('esc-oficiais').value
+        };
+        if(index == -1) escalasBD.push(dados);
+        else escalasBD[index] = dados;
+        
+        localStorage.setItem('escalas_delegada', JSON.stringify(escalasBD));
+        fecharModal();
+        generateDelegadaList();
+        await syncToSheets();
+    };
+
+    async function excluirEscala(index) {
+        if(confirm("Excluir?")) {
+            escalasBD.splice(index, 1);
+            localStorage.setItem('escalas_delegada', JSON.stringify(escalasBD));
+            generateDelegadaList();
+            await syncToSheets();
+        }
+    }
+
+    function editarEscala(index) { abrirModal(index); }
+    function logout() { window.location.href = 'index.html'; }
+    
+    // Inicia no Dashboard
+    showDashboard();
+</script>
+</body>
+</html>

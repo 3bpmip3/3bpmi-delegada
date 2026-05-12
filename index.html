@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - 3º BPM/I</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: white;
+        }
+        .login-container {
+            background-color: #2c2c2c;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            width: 350px;
+            text-align: center;
+        }
+        .logo {
+            width: 180px;
+            margin-bottom: 1rem;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background: #3d3d3d;
+            color: white;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: #d4a017;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #b8860b;
+        }
+        #message {
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <img src="Brasão 3BC.png" alt="Brasão 3º BPM/I" class="logo">
+    <h2>Acesso Restrito</h2>
+    
+    <form id="loginForm">
+        <input type="email" id="email" placeholder="E-mail" required>
+        <input type="password" id="password" placeholder="Senha" required>
+        <button type="submit" id="btnLogin">Entrar</button>
+    </form>
+    
+    <div id="message"></div>
+</div>
+
+<script>
+    const SUPABASE_URL = 'https://yiabgfhtvevrrtfyhjxd.supabase.co/';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpYWJnZmh0dmV2cnJ0ZnloanhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDg4OTAsImV4cCI6MjA5NDEyNDg5MH0.th7vVdBYGI5TmegMNP4JC66doOvSIWXjSgFGhAHpNzM';
+
+    // CORREÇÃO AQUI: Usando supabase.createClient corretamente
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const loginForm = document.getElementById('loginForm');
+    const messageDiv = document.getElementById('message');
+
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const btn = document.getElementById('btnLogin');
+
+        btn.innerText = 'Autenticando...';
+        btn.disabled = true;
+
+        const { data, error } = await _supabase.auth.signInWithPassword({
+            email: email,
+            password: password,
+        });
+
+        if (error) {
+            messageDiv.style.color = '#ff6b6b';
+            messageDiv.innerText = "Erro: " + error.message;
+            btn.innerText = 'Entrar';
+            btn.disabled = false;
+        } else {
+            messageDiv.style.color = '#4cd137';
+            messageDiv.innerText = "Login realizado com sucesso! Redirecionando...";
+            
+            setTimeout(() => {
+                window.location.href = 'painel.html'; 
+            }, 1000);
+        }
+    });
+</script>
+</body>
+</html>

@@ -142,6 +142,7 @@
         .btn-nova { 
             background: rgba(5, 150, 94, 0.7); 
             backdrop-filter: blur(10px); 
+            -webkit-backdrop-filter: blur(10px); 
             color: white; 
             border: 1px solid rgba(255, 255, 255, 0.2); 
             padding: 12px 20px; 
@@ -153,6 +154,13 @@
             align-items: center; 
             gap: 8px; 
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .btn-nova:hover { 
+            background: rgba(5, 150, 48, 0.9); 
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.2);
         }
 
         .footer-stats {
@@ -183,15 +191,18 @@
             justify-content: center; 
             align-items: center; 
         }
-        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 550px; max-height: 90vh; overflow-y: auto; }
+        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 550px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
 
-        input, select { width: 100%; padding: 12px; margin-top: 4px; border: 2px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        label { font-size: 0.85rem; font-weight: 700; color: var(--dark-bg); margin-bottom: 4px; display: block; }
+        input, select { width: 100%; padding: 12px; margin-top: 4px; border: 2px solid var(--border-color); border-radius: 8px; box-sizing: border-box; color: var(--texto-principal); font-size: 1rem; }
         
         #loading-msg { font-size: 0.85rem; color: var(--azul-edit); font-weight: 800; display: none; }
 
         .days-list { margin-top: 10px; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; background: #f8fafc; }
         .day-entry { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; background: white; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0; }
         .day-entry span { flex: 1; font-weight: 600; font-size: 0.9rem; }
+        .day-entry input { width: 150px; margin-top: 0; padding: 6px; font-size: 0.85rem; }
+        .btn-remove-day { background: #fee2e2; color: #b91c1c; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -211,7 +222,7 @@
     <header class="header">
         <h2 id="page-title" style="margin:0; font-size: 1.1rem; color: var(--texto-suave); font-weight: 700;">Painel de Controle</h2>
         <div style="display: flex; align-items: center; gap: 15px;">
-            <span id="loading-msg">Sincronizando...</span>
+            <span id="loading-msg">Sincronizando Dados...</span>
             <button onclick="logout()" style="background:white; color:var(--erro); border:1px solid var(--erro); padding:6px 15px; border-radius:6px; cursor:pointer; font-size: 0.8rem; font-weight: 700;">SAIR</button>
         </div>
     </header>
@@ -227,70 +238,74 @@
 
 <div id="modalEscala" class="modal">
     <div class="modal-content">
-        <h3 id="modal-title" style="margin: 0 0 20px 0; font-weight: 800;">Gerenciar Escala</h3>
+        <h3 id="modal-title" style="margin: 0 0 20px 0; font-size: 1.25rem; color: var(--dark-bg); font-weight: 800;">Gerenciar Dados da Escala</h3>
         <form id="formEscala">
             <input type="hidden" id="edit-index">
             
             <div id="multi-day-container">
-                <label>Data</label>
+                <label>Adicionar Dia(s) da Atividade</label>
                 <div style="display:flex; gap:10px;">
                     <input type="date" id="esc-data-picker">
-                    <button type="button" class="btn-nova" onclick="addDayToList()">+ Add</button>
+                    <button type="button" class="btn-nova" onclick="addDayToList()" style="padding: 0 15px; white-space: nowrap;">+ Add</button>
                 </div>
-                <div id="selected-days-list" class="days-list"></div>
+                <div id="selected-days-list" class="days-list">
+                    <p style="color: #94a3b8; font-size: 0.8rem; margin: 5px 0;">Nenhum dia selecionado.</p>
+                </div>
             </div>
 
             <div id="single-day-container" style="display:none; margin-bottom:15px;">
-                <label>Data</label><input type="date" id="esc-data-single">
-                <label>ID</label><input type="text" id="esc-id-single">
+                <label>Data</label>
+                <input type="date" id="esc-data-single">
+                <label style="margin-top:10px;">Identificador (ID)</label>
+                <input type="text" id="esc-id-single">
             </div>
 
             <div style="display:flex; gap:15px; margin:15px 0;">
-                <div style="flex:1;"><label>Início</label><input type="time" id="esc-inicio" oninput="calcularTermino()" required></div>
-                <div style="flex:1;"><label>Término</label><input type="time" id="esc-termino" readonly></div>
+                <div style="flex:1;"><label>Horário Início</label><input type="time" id="esc-inicio" oninput="calcularTermino()" required></div>
+                <div style="flex:1;"><label>Horário Término</label><input type="time" id="esc-termino" style="background:#f1f5f9; font-weight: 700;" readonly></div>
             </div>
             
-            <label>Descrição</label><input type="text" id="esc-desc" required>
+            <div style="margin-bottom:15px;"><label>Descrição da Escala</label><input type="text" id="esc-desc" placeholder="Delegada 3º BC, etc" required></div>
             
-            <div style="display:flex; gap:15px; margin:15px 0 25px 0;">
-                <div style="flex:1;"><label>Oficiais</label><input type="number" id="esc-oficiais" value="0"></div>
-                <div style="flex:1;"><label>Praças</label><input type="number" id="esc-pracas" value="0"></div>
+            <div style="display:flex; gap:15px; margin-bottom:25px;">
+                <div style="flex:1;"><label>Nº Oficiais</label><input type="number" id="esc-oficiais" value="0"></div>
+                <div style="flex:1;"><label>Nº Praças</label><input type="number" id="esc-pracas" value="0"></div>
             </div>
 
             <div style="display:flex; justify-content:flex-end; gap:12px;">
-                <button type="button" onclick="fecharModal()" style="background:none; border:none; cursor:pointer;">CANCELAR</button>
-                <button type="submit" class="btn-nova">SALVAR</button>
+                <button type="button" onclick="fecharModal()" style="background:none; border:none; color:var(--texto-suave); cursor:pointer; font-weight: 700; padding:10px;">CANCELAR</button>
+                <button type="submit" class="btn-nova">SALVAR ESCALA(S)</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-    // CERTIFIQUE-SE DE QUE ESTA URL É A DO SEU WEB APP ATUALIZADA
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0DEA_FZQfJ2fWh00727YdGP47g1Vs1pzqu9ZYbzErJoZPkExEwtIawu2Be6NCoIX2wg/exec'; 
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwkrAFqbrLnwVapH_yCcuU50R0XV0k2OEsWEjvHovzlb5nY2q3klkEvmZ5wKG3jo-QqVQ/exec'; 
 
     let escalasBD = [];
-    let selectedDays = [];
+    let selectedDays = []; 
     const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
     const abasMeses = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
     const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
     async function loadFromSheets() {
-        const mesIdx = document.getElementById('active-mes')?.value;
-        const ano = document.getElementById('active-ano')?.value;
-        if(!mesIdx || !ano) return;
+        const mesIdx = parseInt(document.getElementById('active-mes')?.value || document.getElementById('sel-mes')?.value);
+        const ano = document.getElementById('active-ano')?.value || document.getElementById('sel-ano')?.value;
+        if (isNaN(mesIdx) || !ano) return;
 
-        const siglaMes = abasMeses[parseInt(mesIdx)];
+        const siglaMes = abasMeses[mesIdx];
         const finalAno = ano.slice(-2);
 
         document.getElementById('loading-msg').style.display = 'inline';
         try {
-            const url = `${SCRIPT_URL}?mes=${siglaMes}&ano=${finalAno}`;
+            // Adicionado timestamp (_t) para evitar cache do navegador e garantir leitura real
+            const url = `${SCRIPT_URL}?mes=${siglaMes}&ano=${finalAno}&_t=${new Date().getTime()}`;
             const response = await fetch(url);
             const data = await response.json();
             escalasBD = data || [];
         } catch (e) { 
-            console.error("Erro ao buscar:", e);
+            console.error("Erro ao carregar:", e);
             escalasBD = []; 
         }
         document.getElementById('loading-msg').style.display = 'none';
@@ -298,9 +313,9 @@
     }
 
     async function syncToSheets() {
-        const mesIdx = document.getElementById('active-mes').value;
+        const mesIdx = parseInt(document.getElementById('active-mes').value);
         const ano = document.getElementById('active-ano').value;
-        const siglaMes = abasMeses[parseInt(mesIdx)];
+        const siglaMes = abasMeses[mesIdx];
         const finalAno = ano.slice(-2);
         
         document.getElementById('loading-msg').style.display = 'inline';
@@ -313,19 +328,20 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
+            // Pequeno delay para o Apps Script processar e recarrega os dados
             setTimeout(loadFromSheets, 800);
-        } catch (e) { console.error(e); }
-        document.getElementById('loading-msg').style.display = 'none';
+        } catch (e) { 
+            console.error("Erro ao sincronizar:", e);
+        }
     }
 
     function showDashboard() {
-        localStorage.removeItem('ultimoMes');
-        localStorage.removeItem('ultimoAno');
         document.getElementById('page-title').innerText = "INÍCIO";
         document.getElementById('footer-stats').style.display = 'none';
         document.getElementById('dynamic-content').innerHTML = `
-            <h3>Bem Vindo</h3>
-            <p>Os dados são recuperados da planilha do <b>Google Sheets</b> automaticamente.</p>
+            <h3 style="margin-top:0; color:var(--dark-bg);">Bem Vindo</h3>
+            <p style="color:var(--texto-suave); font-size:1.1rem;">Os dados são sincronizados automaticamente com o <b>Google Sheets</b>.</p>
+            <p style="color:var(--texto-suave); font-size:1.1rem;">Utilize o menu lateral para gerenciar as escalas da <b>Atividade DELEGADA</b>.</p>
         `;
     }
 
@@ -333,17 +349,19 @@
         document.getElementById('page-title').innerText = "Atividade DELEGADA";
         document.getElementById('footer-stats').style.display = 'none';
         document.getElementById('dynamic-content').innerHTML = `
-            <div style="text-align:center; padding:40px;">
-                <h3 class="subtitle" style="justify-content:center;">Selecione o Período</h3>
-                <div style="display:flex; justify-content:center; gap:15px; margin: 30px 0;">
+            <div style="text-align:center; padding:40px 0;">
+                <h3 class="subtitle" style="justify-content:center; margin-bottom:30px;">Selecione o Período</h3>
+                <div style="display:flex; justify-content:center; gap:15px; margin-bottom:30px;">
                     <select id="sel-ano" style="width:130px;">
-                        <option value="2026">2026</option><option value="2027">2027</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
                     </select>
                     <select id="sel-mes" style="width:180px;">
                         ${nomesMeses.map((m, i) => `<option value="${i}">${m}</option>`).join('')}
                     </select>
                 </div>
-                <button class="btn-nova" style="margin:0 auto;" onclick="renderTableFlow()">ACESSAR CALENDÁRIO</button>
+                <button class="btn-nova" style="margin: 0 auto; padding: 15px 45px; font-size: 1rem;" onclick="renderTableFlow()">ACESSAR CALENDÁRIO</button>
             </div>
         `;
     }
@@ -351,20 +369,18 @@
     async function renderTableFlow() {
         const mesIdx = document.getElementById('sel-mes').value;
         const ano = document.getElementById('sel-ano').value;
-        
-        localStorage.setItem('ultimoMes', mesIdx);
-        localStorage.setItem('ultimoAno', ano);
+        if(mesIdx === "" || ano === "") return;
 
         const mesInt = parseInt(mesIdx);
         document.getElementById('dynamic-content').innerHTML = `
             <div class="subtitle-container">
                 <div style="display:flex; align-items:center; gap:15px;">
-                    <button onclick="showDelegadaSelector()" style="cursor:pointer; padding:5px 10px;">←</button>
+                    <button onclick="showDelegadaSelector()" style="background:#f1f5f9; border:1px solid #cbd5e1; color:var(--dark-bg); cursor:pointer; font-size:1.2rem; padding:5px 10px; border-radius:6px; font-weight:bold;">←</button>
                     <h3 class="subtitle">${nomesMeses[mesInt]} ${ano}</h3>
                 </div>
                 <button class="btn-nova" onclick="abrirModal()">+ Nova Escala</button>
             </div>
-            <div class="table-wrapper"><div id="delegada-list-container">Carregando dados da planilha...</div></div>
+            <div class="table-wrapper"><div id="delegada-list-container">Lendo informações da planilha...</div></div>
             <input type="hidden" id="active-mes" value="${mesInt}"><input type="hidden" id="active-ano" value="${ano}">
         `;
         document.getElementById('footer-stats').style.display = 'flex';
@@ -378,42 +394,75 @@
         const ano = parseInt(document.getElementById('active-ano').value);
         const diasNoMes = new Date(ano, mesIdx + 1, 0).getDate();
         
-        let tOficiais = 0, tPracas = 0;
-        let html = `<table class="delegada-table"><thead><tr><th>DATA</th><th>ID</th><th>TURNO</th><th>DESCRIÇÃO</th><th>OF</th><th>PR</th><th>AÇÕES</th></tr></thead><tbody>`;
+        let totalOficiais = 0, totalPracas = 0;
+        let html = `<table class="delegada-table">
+            <colgroup>
+                <col class="col-data"><col class="col-id"><col class="col-turno"><col class="col-desc"><col class="col-qtd"><col class="col-qtd"><col class="col-acoes">
+            </colgroup>
+            <thead><tr><th>DATA</th><th>ID ESCALA</th><th>TURNO</th><th>DESCRIÇÃO</th><th>OFICIAIS</th><th>PRAÇAS</th><th>AÇÕES</th></tr></thead><tbody>`;
 
         for (let d = 1; d <= diasNoMes; d++) {
             const dataObj = new Date(ano, mesIdx, d);
-            const diaSem = dataObj.getDay();
+            const diaSemIdx = dataObj.getDay();
+            const isWeekend = (diaSemIdx === 0 || diaSemIdx === 6);
             const dataIso = `${ano}-${(mesIdx+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
-            const escalas = escalasBD.filter(e => e.data === dataIso);
-            const isW = (diaSem === 0 || diaSem === 6);
+            const escalasDoDia = escalasBD.filter(e => e.data === dataIso);
 
-            if (escalas.length === 0) {
-                html += `<tr class="${isW ? 'weekend' : ''}"><td class="day-row">${d} | ${diasSemana[diaSem]}</td><td colspan="5">-</td><td>-</td></tr>`;
+            if (escalasDoDia.length === 0) {
+                html += `<tr class="${isWeekend ? 'weekend' : ''}">
+                    <td class="day-row">${d.toString().padStart(2,'0')} | ${diasSemana[diaSemIdx]}</td>
+                    <td colspan="5" style="color:#94a3b8; font-style:italic;">Não há escalas</td><td>-</td></tr>`;
             } else {
-                escalas.forEach((esc, idx) => {
+                escalasDoDia.forEach((esc, idx) => {
                     const gIdx = escalasBD.indexOf(esc);
-                    tOficiais += parseInt(esc.oficiais || 0); tPracas += parseInt(esc.pracas || 0);
-                    html += `<tr class="${isW ? 'weekend' : ''}">
-                        ${idx === 0 ? `<td rowspan="${escalas.length}" class="day-row">${d} | ${diasSemana[diaSem]}</td>` : ''}
-                        <td>${esc.id}</td><td>${esc.inicio}-${esc.termino}</td><td>${esc.desc}</td>
-                        <td>${esc.oficiais}</td><td>${esc.pracas}</td>
-                        <td><button onclick="editarEscala(${gIdx})">Edit</button> <button onclick="excluirEscala(${gIdx})">X</button></td></tr>`;
+                    totalOficiais += parseInt(esc.oficiais || 0); totalPracas += parseInt(esc.pracas || 0);
+                    html += `<tr class="${isWeekend ? 'weekend' : ''}">
+                        ${idx === 0 ? `<td rowspan="${escalasDoDia.length}" class="day-row">${d.toString().padStart(2,'0')} | ${diasSemana[diaSemIdx]}</td>` : ''}
+                        <td><b>${esc.id}</b></td><td>${esc.inicio} às ${esc.termino}</td><td>${esc.desc}</td>
+                        <td><b>${esc.oficiais}</b></td><td><b>${esc.pracas}</b></td>
+                        <td><div class="action-btns"><button class="btn-action btn-edit" onclick="editarEscala(${gIdx})">Editar</button>
+                        <button class="btn-action btn-delete" onclick="excluirEscala(${gIdx})">Excluir</button></div></td></tr>`;
                 });
             }
         }
         container.innerHTML = html + '</tbody></table>';
-        document.getElementById('total-oficiais').innerText = tOficiais;
-        document.getElementById('total-pracas').innerText = tPracas;
+        document.getElementById('total-oficiais').innerText = totalOficiais;
+        document.getElementById('total-pracas').innerText = totalPracas;
     }
 
-    // Modal e Funções de apoio
+    function addDayToList() {
+        const dataInput = document.getElementById('esc-data-picker');
+        const dataVal = dataInput.value;
+        if(dataVal && !selectedDays.find(d => d.data === dataVal)) {
+            selectedDays.push({ data: dataVal, id: '' });
+            renderSelectedDays();
+            dataInput.value = '';
+        }
+    }
+
+    function removeDayFromList(index) { selectedDays.splice(index, 1); renderSelectedDays(); }
+    function updateDayId(index, value) { selectedDays[index].id = value; }
+
+    function renderSelectedDays() {
+        const list = document.getElementById('selected-days-list');
+        if(selectedDays.length === 0) {
+            list.innerHTML = `<p style="color: #94a3b8; font-size: 0.8rem; margin: 5px 0;">Nenhum dia selecionado.</p>`;
+            return;
+        }
+        list.innerHTML = selectedDays.map((d, i) => `
+            <div class="day-entry"><span>${d.data.split('-').reverse().join('/')}</span>
+            <input type="text" placeholder="ID Escala" value="${d.id}" onchange="updateDayId(${i}, this.value)">
+            <button type="button" class="btn-remove-day" onclick="removeDayFromList(${i})">×</button></div>
+        `).join('');
+    }
+
     function abrirModal(index = -1) {
         document.getElementById('modalEscala').style.display = 'flex';
         document.getElementById('edit-index').value = index;
         selectedDays = [];
         if(index !== -1) {
             const e = escalasBD[index];
+            document.getElementById('modal-title').innerText = "Editar Escala";
             document.getElementById('multi-day-container').style.display = 'none';
             document.getElementById('single-day-container').style.display = 'block';
             document.getElementById('esc-data-single').value = e.data;
@@ -424,6 +473,7 @@
             document.getElementById('esc-oficiais').value = e.oficiais;
             document.getElementById('esc-pracas').value = e.pracas;
         } else {
+            document.getElementById('modal-title').innerText = "Gerenciar Múltiplas Escalas";
             document.getElementById('multi-day-container').style.display = 'block';
             document.getElementById('single-day-container').style.display = 'none';
             document.getElementById('formEscala').reset();
@@ -432,29 +482,10 @@
     }
 
     function fecharModal() { document.getElementById('modalEscala').style.display = 'none'; }
-    
-    function addDayToList() {
-        const d = document.getElementById('esc-data-picker').value;
-        if(d && !selectedDays.find(x => x.data === d)) {
-            selectedDays.push({ data: d, id: '' });
-            renderSelectedDays();
-        }
-    }
-
-    function renderSelectedDays() {
-        const list = document.getElementById('selected-days-list');
-        list.innerHTML = selectedDays.map((d, i) => `
-            <div class="day-entry">
-                <span>${d.data}</span>
-                <input type="text" placeholder="ID" onchange="selectedDays[${i}].id=this.value">
-            </div>
-        `).join('');
-    }
-
     function calcularTermino() {
-        const i = document.getElementById('esc-inicio').value;
-        if (!i) return;
-        let [h, m] = i.split(':').map(Number);
+        const inicio = document.getElementById('esc-inicio').value;
+        if (!inicio) return;
+        let [h, m] = inicio.split(':').map(Number);
         h = (h + 8) % 24;
         document.getElementById('esc-termino').value = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
     }
@@ -471,41 +502,29 @@
         };
 
         if (index === -1) {
+            if(selectedDays.length === 0) { alert("Selecione ao menos um dia."); return; }
             selectedDays.forEach(dia => {
-                escalasBD.push({ ...comum, data: dia.data, id: dia.id || 'S/ID' });
+                const dados = { ...comum, data: dia.data, id: dia.id || 'S/ID' };
+                const idxExistente = escalasBD.findIndex(esc => esc.id === dia.id && esc.data === dia.data);
+                if(idxExistente !== -1) escalasBD[idxExistente] = dados; else escalasBD.push(dados);
             });
         } else {
             escalasBD[index] = { ...comum, data: document.getElementById('esc-data-single').value, id: document.getElementById('esc-id-single').value };
         }
         fecharModal();
-        generateDelegadaList();
         await syncToSheets();
     };
 
-    async function excluirEscala(idx) {
-        if(confirm("Excluir?")) { escalasBD.splice(idx, 1); generateDelegadaList(); await syncToSheets(); }
+    async function excluirEscala(index) {
+        if(confirm("Confirma a exclusão?")) {
+            escalasBD.splice(index, 1);
+            await syncToSheets();
+        }
     }
 
-    function logout() { localStorage.clear(); location.reload(); }
-
-    // INICIALIZAÇÃO CORRIGIDA
-    window.addEventListener('load', () => {
-        const m = localStorage.getItem('ultimoMes');
-        const a = localStorage.getItem('ultimoAno');
-        
-        if (m !== null && a !== null) {
-            // Se existia um período, reconstrói a tela de seleção e clica no botão de carregar
-            showDelegadaSelector().then(() => {
-                document.getElementById('sel-mes').value = m;
-                document.getElementById('sel-ano').value = a;
-                renderTableFlow();
-            });
-        } else {
-            showDashboard();
-        }
-    });
-
     function editarEscala(idx) { abrirModal(idx); }
+    function logout() { location.reload(); }
+    showDashboard();
 </script>
 </body>
 </html>

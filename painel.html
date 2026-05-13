@@ -140,28 +140,28 @@
         .btn-delete { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
 
         .btn-nova { 
-    background: rgba(5, 150, 94, 0.7); /* Verde principal com transparência */
-    backdrop-filter: blur(10px); 
-    -webkit-backdrop-filter: blur(10px); 
-    color: white; 
-    border: 1px solid rgba(255, 255, 255, 0.2); 
-    padding: 12px 20px; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    font-weight: 700; 
-    font-size: 0.9rem; 
-    display: flex; 
-    align-items: center; 
-    gap: 8px; 
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-}
+            background: rgba(5, 150, 94, 0.7); 
+            backdrop-filter: blur(10px); 
+            -webkit-backdrop-filter: blur(10px); 
+            color: white; 
+            border: 1px solid rgba(255, 255, 255, 0.2); 
+            padding: 12px 20px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 700; 
+            font-size: 0.9rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
 
-.btn-nova:hover { 
-    background: rgba(5, 150, 48, 0.9); 
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(5, 150, 105, 0.2);
-}
+        .btn-nova:hover { 
+            background: rgba(5, 150, 48, 0.9); 
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.2);
+        }
 
         .footer-stats {
             position: fixed;
@@ -198,7 +198,6 @@
         
         #loading-msg { font-size: 0.85rem; color: var(--azul-edit); font-weight: 800; display: none; }
 
-        /* Estilos para seleção de múltiplos dias */
         .days-list { margin-top: 10px; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; background: #f8fafc; }
         .day-entry { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; background: white; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0; }
         .day-entry span { flex: 1; font-weight: 600; font-size: 0.9rem; }
@@ -214,7 +213,7 @@
         <h3>Sistema 3º BPM/I</h3>
     </div>
     <nav style="margin-top: 15px;">
-        <div class="menu-item" onclick="showDashboard()">INÍCIO</div>
+        <div class="menu-item" onclick="showDashboard()">Início</div>
         <div class="menu-item" onclick="showDelegadaSelector()">Atividade DELEGADA</div>
     </nav>
 </aside>
@@ -285,14 +284,16 @@
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0DEA_FZQfJ2fWh00727YdGP47g1Vs1pzqu9ZYbzErJoZPkExEwtIawu2Be6NCoIX2wg/exec'; 
 
     let escalasBD = [];
-    let selectedDays = []; // Array de objetos {data: '...', id: '...'}
+    let selectedDays = [];
     const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
     const abasMeses = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
     const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
     async function loadFromSheets() {
-        const mesIdx = parseInt(document.getElementById('active-mes')?.value || document.getElementById('sel-mes').value);
-        const ano = document.getElementById('active-ano')?.value || document.getElementById('sel-ano').value;
+        const mesIdx = parseInt(document.getElementById('active-mes')?.value);
+        const ano = document.getElementById('active-ano')?.value;
+        if(isNaN(mesIdx) || !ano) return;
+
         const siglaMes = abasMeses[mesIdx];
         const finalAno = ano.slice(-2);
 
@@ -313,6 +314,7 @@
         const siglaMes = abasMeses[mesIdx];
         const finalAno = ano.slice(-2);
         document.getElementById('loading-msg').style.display = 'inline';
+        
         const payload = { mes: siglaMes, ano: finalAno, escalas: escalasBD };
         try {
             await fetch(SCRIPT_URL, {
@@ -321,12 +323,16 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
+            // Recarrega após um pequeno delay para garantir sincronia
+            setTimeout(loadFromSheets, 500);
         } catch (e) {}
         document.getElementById('loading-msg').style.display = 'none';
     }
 
     function showDashboard() {
-        document.getElementById('page-title').innerText = "Início";
+        localStorage.removeItem('active_mes');
+        localStorage.removeItem('active_ano');
+        document.getElementById('page-title').innerText = "INÍCIO";
         document.getElementById('footer-stats').style.display = 'none';
         document.getElementById('dynamic-content').innerHTML = `
             <h3 style="margin-top:0; color:var(--dark-bg);">Bem Vindo</h3>
@@ -358,14 +364,18 @@
         `;
     }
 
-    async function renderTableFlow() {
-        const mesIdx = document.getElementById('sel-mes').value;
-        const ano = document.getElementById('sel-ano').value;
+    async function renderTableFlow(forceMes, forceAno) {
+        const mesIdx = forceMes !== undefined ? forceMes : document.getElementById('sel-mes').value;
+        const ano = forceAno !== undefined ? forceAno : document.getElementById('sel-ano').value;
         
         if(mesIdx === "" || ano === "") {
             alert("Por favor, selecione o Ano e o Mês.");
             return;
         }
+
+        // Salva estado para F5
+        localStorage.setItem('active_mes', mesIdx);
+        localStorage.setItem('active_ano', ano);
 
         const mesInt = parseInt(mesIdx);
 
@@ -446,17 +456,12 @@
         document.getElementById('total-pracas').innerText = totalPracas;
     }
 
-    // --- FUNÇÕES DE SELEÇÃO DE MÚLTIPLOS DIAS ---
-
     function addDayToList() {
         const dataInput = document.getElementById('esc-data-picker');
         const dataVal = dataInput.value;
         if(!dataVal) return;
-        
-        // Evitar duplicados
         if(selectedDays.find(d => d.data === dataVal)) return;
-
-        selectedDays.push({ data: dataVal, id: 'insira a ID Escala' });
+        selectedDays.push({ data: dataVal, id: '' });
         renderSelectedDays();
         dataInput.value = '';
     }
@@ -476,7 +481,6 @@
             list.innerHTML = `<p style="color: #94a3b8; font-size: 0.8rem; margin: 5px 0;">Nenhum dia selecionado.</p>`;
             return;
         }
-
         list.innerHTML = selectedDays.map((d, i) => {
             const dataFormatada = d.data.split('-').reverse().join('/');
             return `
@@ -489,20 +493,16 @@
         }).join('');
     }
 
-    // --- MODAL E SALVAMENTO ---
-
     function abrirModal(index = -1) {
         document.getElementById('modalEscala').style.display = 'flex';
         document.getElementById('edit-index').value = index;
         selectedDays = [];
         
         if(index !== -1) {
-            // MODO EDIÇÃO (Apenas um dia)
             const e = escalasBD[index];
             document.getElementById('modal-title').innerText = "Editar Escala";
             document.getElementById('multi-day-container').style.display = 'none';
             document.getElementById('single-day-container').style.display = 'block';
-            
             document.getElementById('esc-data-single').value = e.data;
             document.getElementById('esc-id-single').value = e.id;
             document.getElementById('esc-inicio').value = e.inicio;
@@ -511,7 +511,6 @@
             document.getElementById('esc-oficiais').value = e.oficiais;
             document.getElementById('esc-pracas').value = e.pracas;
         } else {
-            // MODO CRIAÇÃO (Múltiplos dias)
             document.getElementById('modal-title').innerText = "Gerenciar Múltiplas Escalas";
             document.getElementById('multi-day-container').style.display = 'block';
             document.getElementById('single-day-container').style.display = 'none';
@@ -544,26 +543,12 @@
         };
 
         if (index === -1) {
-            // LÓGICA DE CRIAÇÃO MÚLTIPLA
-            if(selectedDays.length === 0) {
-                alert("Selecione ao menos um dia.");
-                return;
-            }
-
+            if(selectedDays.length === 0) { alert("Selecione ao menos um dia."); return; }
             selectedDays.forEach(dia => {
-                const dados = { ...comum, data: dia.data, id: dia.id };
-                
-                // Verificar se o ID já existe
-                const indexExistente = escalasBD.findIndex(esc => esc.id === dia.id && esc.data === dia.data);
-                if(indexExistente !== -1) {
-                    escalasBD[indexExistente] = dados;
-                } else {
-                    escalasBD.push(dados);
-                }
+                const dados = { ...comum, data: dia.data, id: dia.id || 'S/ID' };
+                escalasBD.push(dados);
             });
-
         } else {
-            // LÓGICA DE EDIÇÃO SIMPLES
             const dados = {
                 ...comum,
                 data: document.getElementById('esc-data-single').value,
@@ -585,8 +570,22 @@
         }
     }
 
-    function logout() { location.reload(); }
-    showDashboard();
+    function logout() { 
+        localStorage.clear();
+        location.reload(); 
+    }
+
+    // Lógica para recuperar estado após F5
+    window.onload = () => {
+        const m = localStorage.getItem('active_mes');
+        const a = localStorage.getItem('active_ano');
+        if(m !== null && a !== null) {
+            renderTableFlow(m, a);
+        } else {
+            showDashboard();
+        }
+    }
+
 </script>
 </body>
 </html>

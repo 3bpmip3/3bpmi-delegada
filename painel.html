@@ -906,12 +906,17 @@ document.getElementById('valor-total-geral').innerText =
     }
 
     /* =========================================================
-       Reinicia o sistema recarregando a página.
-    ========================================================== */
-    function logout() {
+   Faz logout do sistema e redireciona para a página inicial
+========================================================= */
+function logout() {
 
-        location.reload();
-    }
+    // Remove possíveis dados de sessão/localStorage
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // Redireciona para a página de login
+    window.location.href = "index.html";
+}
 
     /* =========================================================
        Inicializa o sistema exibindo a tela inicial.

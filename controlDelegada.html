@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro de Controle de Escalas - Atividade Delegada</title>
+    <style>
+        :root {
+            --cinza-bandeirante: #545A5C;
+            --cinza-escuro: #313536;
+            --cinza-claro: #7A8184;
+            --militar-accent: #8FA192;
+            --text-light: #F4F5F5;
+            --glass-bg: rgba(84, 90, 92, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --glass-glow: rgba(143, 161, 146, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--cinza-escuro) 0%, var(--cinza-bandeirante) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            padding: 30px 20px;
+            padding-bottom: 80px;
+            display: block;
+        }
+
+        .container {
+            max-width: 1100px; 
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid var(--militar-accent);
+            padding-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        header h1 {
+            font-size: 24pt;
+            color: var(--text-light);
+        }
+
+        header p {
+            font-size: 10pt;
+            color: var(--militar-accent);
+            margin-top: 5px;
+        }
+
+        .titulo-secao-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 14pt;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--militar-accent);
+            border-left: 4px solid var(--militar-accent);
+            padding-left: 10px;
+            margin-bottom: 0;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .form-row {
+            display: table;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .form-col {
+            display: table-cell;
+            width: 33.33%;
+            padding-right: 15px;
+            vertical-align: top;
+        }
+
+        .form-col:last-child {
+            padding-right: 0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 10pt;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="time"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            color: white;
+            font-size: 11pt;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--militar-accent);
+            box-shadow: 0 0 8px var(--glass-glow);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        /* Grid de Efetivo Militar */
+        .efetivo-section {
+            margin-top: 25px;
+            border-top: 1px dashed var(--glass-border);
+            padding-top: 20px;
+        }
+
+        .efetivo-grid {
+            display: block;
+            margin-bottom: 20px;
+        }
+
+        .efetivo-bloco {
+            margin-bottom: 20px;
+        }
+
+        .efetivo-titulo-grupo {
+            font-size: 11pt;
+            font-weight: bold;
+            color: var(--militar-accent);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(143, 161, 146, 0.3);
+            padding-bottom: 4px;
+        }
+
+        .postos-container {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .posto-item {
+            display: table-cell;
+            padding: 5px;
+            text-align: center;
+        }
+
+        .posto-label {
+            display: block;
+            font-size: 9pt;
+            margin-bottom: 6px;
+            color: var(--text-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .posto-input {
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Botões Form */
+        .btn-container {
+            text-align: right;
+            margin-top: 25px;
+        }
+
+        button {
+            padding: 12px 28px;
+            font-size: 11pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-principal {
+            background: var(--militar-accent);
+            color: var(--cinza-escuro);
+        }
+
+        .btn-principal:hover {
+            background: #a3b5a6;
+            box-shadow: 0 4px 20px var(--glass-glow);
+            transform: translateY(-1px);
+        }
+
+        .btn-secundario {
+            background: transparent;
+            color: var(--text-light);
+            border: 1px solid var(--glass-border);
+            margin-right: 10px;
+        }
+
+        .btn-secundario:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .btn-voltar {
+            padding: 8px 16px;
+            font-size: 9pt;
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text-light);
+            border: 1px solid var(--glass-border);
+        }
+
+        .btn-voltar:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Tabelas Operacionais */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 10pt;
+        }
+
+        th {
+            background: rgba(0, 0, 0, 0.4);
+            color: var(--militar-accent);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            padding: 12px;
+            border-bottom: 2px solid var(--militar-accent);
+            text-align: center;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--glass-border);
+            color: var(--text-light);
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .acoes-wrapper {
+            display: inline-block;
+            text-align: center;
+        }
+
+        .acoes-linha-superior {
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .btn-tabela {
+            padding: 6px 10px;
+            font-size: 8.5pt;
+            letter-spacing: 0.5px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            display: inline-block;
+            text-decoration: none;
+            font-weight: bold;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-tabela:hover {
+            transform: scale(1.03);
+        }
+
+        .btn-tabela-acessar {
+            background: #3A6B73;
+            color: white;
+            width: 100%; 
+            box-sizing: border-box;
+        }
+
+        .btn-tabela-acessar:hover {
+            background: #46818A;
+        }
+
+        .btn-tabela-editar {
+            background: #D1A153;
+            color: #1a1a1a;
+            margin-right: 3px;
+        }
+
+        .btn-tabela-editar:hover {
+            background: #e0b363;
+        }
+
+        .btn-tabela-excluir {
+            background: #A64B4B;
+            color: white;
+        }
+
+        .btn-tabela-excluir:hover {
+            background: #b85c5c;
+        }
+
+        .efetivo-destaque {
+            color: #8FA192;
+            font-weight: bold;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--militar-accent);
+            font-style: italic;
+            letter-spacing: 1px;
+        }
+
+        .btn-flutuante-extracao {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: rgba(58, 107, 115, 0.85);
+            color: white;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 14px 22px;
+            font-size: 10pt;
+            border-radius: 50px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-flutuante-extracao:hover {
+            background: #46818A;
+            box-shadow: 0 6px 25px var(--glass-glow);
+            transform: translateY(-2px);
+        }
+
+        .btn-flutuante-extracao:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>3º Batalhão de Caçadores</h1>
+        <p>Atividade Delegada • Ribeirão Preto</p>
+    </header>
+
+    <div class="glass-card">
+        <div class="titulo-secao-container">
+            <h2>Registro de Escala</h2>
+            <button class="btn-voltar" onclick="window.location.assign('dashboard.html')">← Voltar ao Dashboard</button>
+        </div>
+        <form id="escalaForm">
+            <input type="hidden" id="actionType" value="criar">
+            <input type="hidden" id="idAntigo" value="">
+            
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="idEscala">ID Escala:</label>
+                        <input type="text" id="idEscala" pattern="\d{7}" required maxlength="7" placeholder="Digite da ID">
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="dataEscala">Data:</label>
+                        <input type="date" id="dataEscala" required>
+                    </div>
+                </div>
+                <div class="form-col">
+                    </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="horaInicio">Hora Início:</label>
+                        <input type="time" id="horaInicio" required oninput="calcularTermino()">
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="horaTermino">Hora Término:</label>
+                        <input type="time" id="horaTermino" readonly>
+                    </div>
+                </div>
+                <div class="form-col">
+                    </div>
+            </div>
+
+            <div class="efetivo-section">
+                <label style="color: var(--militar-accent); margin-bottom: 15px;">Distribuição de Efetivo:</label>
+                
+                <div class="efetivo-grid">
+                    <div class="efetivo-bloco">
+                        <div class="efetivo-titulo-grupo">Oficiais - Valor Unitário: R$ 414,96</div>
+                        <div class="postos-container">
+                            <div class="posto-item">
+                                <span class="posto-label">Cel PM</span>
+                                <input type="number" min="0" value="0" class="posto-input" data-posto="Cel PM" data-tipo="Oficial">
+                            </div>
+                            <div class="posto-item">
+                                <span class="posto-label">Ten Cel PM</span>
+                                <input type="number" min="0" value="0" class="posto-input" data-posto="Ten Cel PM" data-tipo="Oficial">
+                            </div>
+                            <div class="posto-item">
+                                <span class="posto-label">Maj PM</span>
+                                <input type="number" min="0" value="0" class="posto-input" data-posto="Maj PM" data-tipo="Oficial">
+                            </div>
+                            <div class="posto-item">
+                                <span class="posto-label">Cap PM</span>
+                                <input type="number" min="0" value="0" class="posto-input" data-posto="Cap PM" data-tipo="Oficial">
+                            </div>
+                            <div class="posto-item">
+                                <span class="posto-label">1º Ten PM</span>
+                                <input type="number" min="0" value="0" class="posto-input" data-posto="1º Ten PM" data-tipo="Oficial">
+                            </div>
+                            <div class="posto-item">
+                                <span class="posto-label">2º Ten PM</span>
+                                <input type="number" min="0" value="0" class="posto-input" data-posto="2º Ten PM" data-tipo="Oficial">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="efetivo-bloco">
+                        <div class="efetivo-titulo-grupo">Praças - Valor Unitário: R$ 353,46</div>
+                        <div class="postos-container">
+                            <div class="posto-item">
+                                <span class="posto-label">Subten PM</span>
+                                <input type="number" min="0" value="0" class="posto-input" data-posto="Subten PM" data-tipo="Praça">
+                            </div>
+                            <div class="posto-item">
+                                <span class="posto-label">1º Sgt PM</span>
+                                <input type="number" min="0" value="0" class="posto-input" data-posto="1º Sgt PM" data-tipo="Praça">
+                            </div>
+                            <div class="posto-item">
+                                <span class="posto-label">2º Sgt PM</span>
+                                <input type="number" min="0" value="0" class="posto-input" data-posto="2º Sgt PM" data-tipo="Praça">
+                            </div>
+                            <div class="posto-item">
+                                <span class="posto-label">3º Sgt PM</span>
+                                <input type="number" min="0" value="0" class="posto-input" data-posto="3º Sgt PM" data-tipo="Praça">
+                            </div>
+                            <div class="posto-item">
+                                <span class="posto-label">Cb PM</span>
+                                <input type="number" min="0" value="0" class="posto-input" data-posto="Cb PM" data-tipo="Praça">
+                            </div>
+                            <div class="posto-item">
+                                <span class="posto-label">Sd PM</span>
+                                <input type="number" min="0" value="0" class="posto-input" data-posto="Sd PM" data-tipo="Praça">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 20px;">
+                <label for="descricao">Missão/Descrição da Escala:</label>
+                <textarea id="descricao" rows="3" placeholder="Insira o detalhamento da missão e locais de atuação..."></textarea>
+            </div>
+
+            <div class="btn-container">
+                <button type="button" id="btnCancelar" class="btn-secundario" style="display:none;" onclick="resetarFormulario()">Cancelar</button>
+                <button type="submit" id="submitBtn" class="btn-principal">Criar Escala</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="glass-card">
+        <h2 id="tituloTabela">Escalas Registradas no Google Sheets</h2>
+        <div class="table-responsive">
+            <table id="tabelaEscalas">
+                <thead>
+                    <tr>
+                        <th>ID Escala</th>
+                        <th>Data</th>
+                        <th>Turno</th>
+                        <th>Missão/Descrição</th>
+                        <th>Distribuição de Efetivo</th>
+                        <th>Custo Estimado da Escala</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="corpoTabela">
+                    <tr>
+                        <td colspan="7" class="loading">Aguardando conexão com a central de dados...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<button type="button" id="btnExportar" class="btn-flutuante-extracao" onclick="extrairDadosEscalas()">
+    📊 Extrair Dados das Escalas
+</button>
+
+<script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwaYOLw5yNhamo8UPv7pzgNjo22Vb2ZD2YvXJfR6bieawngY1Hby_lZPpRYZNYONuxyPg/exec"; 
+
+    // CAPTURA DOS PARÂMETROS DA URL (?mes=XX&ano=YYYY)
+    const urlParams = new URLSearchParams(window.location.search);
+    const mesSelecionado = urlParams.get('mes');
+    const anoSelecionado = urlParams.get('ano');
+
+    // Se vier sem os parâmetros, força retornar ao dashboard por segurança
+    if (!mesSelecionado || !anoSelecionado) {
+        alert("Período de busca não especificado. Retornando ao menu de seleção.");
+        window.location.assign('dashboard.html');
+    }
+
+    // Altera dinamicamente o título da listagem com base no mês e ano recebidos
+    document.getElementById('tituloTabela').innerText = `Escalas Filtradas para o Período: ${mesSelecionado}/${anoSelecionado}`;
+
+    function calcularTermino() {
+        let inicio = document.getElementById('horaInicio').value;
+        if(inicio) {
+            let partes = inicio.split(':');
+            let horas = parseInt(partes[0]);
+            let minutos = partes[1];
+            
+            let horasTermino = (horas + 8) % 24;
+            let horasFormatadas = horasTermino.toString().padStart(2, '0');
+            
+            document.getElementById('horaTermino').value = `${horasFormatadas}:${minutos}`;
+        } else {
+            document.getElementById('horaTermino').value = "";
+        }
+    }
+
+    function extrairApenasHora(stringHorario) {
+        if(!stringHorario) return "00:00";
+        let apenasHora = stringHorario.includes('T') ? stringHorario.split('T')[1] : stringHorario;
+        return apenasHora.substring(0, 5);
+    }
+
+    function formatarHoraCustomizada(horarioRaw) {
+        let horario = extrairApenasHora(horarioRaw);
+        let partes = horario.split(':');
+        let h = partes[0];
+        let m = partes[1] || "00";
+        return m === "00" ? `${parseInt(h)}h` : `${h}h${m}`;
+    }
+
+    function destacarQuantidadeEfetivo(textoLinha) {
+        if(!textoLinha) return "";
+        return textoLinha.replace(/(\(\d+\))/g, '<span class="efetivo-destaque">$1</span>');
+    }
+
+    document.getElementById('escalaForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        let acao = document.getElementById('actionType').value;
+        let efetivoDistribuido = [];
+        let inputsPostos = document.querySelectorAll('.posto-input');
+        
+        inputsPostos.forEach(input => {
+            let qtd = parseInt(input.value) || 0;
+            if (qtd > 0) {
+                efetivoDistribuido.push({
+                    posto: input.getAttribute('data-posto'),
+                    tipo: input.getAttribute('data-tipo'),
+                    qtd: qtd
+                });
+            }
+        });
+
+        if (efetivoDistribuido.length === 0) {
+            alert("Atenção: Você deve inserir a quantidade de pelo menos 1 policial em algum posto/graduação.");
+            return;
+        }
+        
+        let dados = {
+            acao: acao,
+            id: document.getElementById('idEscala').value,
+            idAntigo: document.getElementById('idAntigo').value,
+            data: document.getElementById('dataEscala').value,
+            inicio: document.getElementById('horaInicio').value,
+            termino: document.getElementById('horaTermino').value,
+            efetivo: efetivoDistribuido,
+            descricao: document.getElementById('descricao').value
+        };
+
+        document.getElementById('submitBtn').innerText = "Processando...";
+        document.getElementById('submitBtn').disabled = true;
+
+        fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify(dados)
+        }).then(() => {
+            alert(acao === 'criar' ? "Escala registrada com sucesso!" : "Escala atualizada com sucesso!");
+            resetarFormulario();
+            setTimeout(carregarEscalas, 2000); 
+        }).catch(err => {
+            alert("Erro ao tentar salvar dados na planilha.");
+            console.error(err);
+        });
+    });
+
+    function carregarEscalas() {
+        let tbody = document.getElementById('corpoTabela');
+        tbody.innerHTML = `<tr><td colspan="7" class="loading">Consultando planilhas e filtrando dados para ${mesSelecionado}/${anoSelecionado}...</td></tr>`;
+
+        fetch(WEB_APP_URL)
+        .then(res => res.json())
+        .then(data => {
+            tbody.innerHTML = "";
+            if(data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Nenhuma escala cadastrada no banco de dados.</td></tr>`;
+                return;
+            }
+
+            // Define o padrão procurado na string de data, exemplo: "/06/2026"
+            const termoFiltroData = `/${mesSelecionado}/${anoSelecionado}`;
+            let totalExibido = 0;
+
+            data.forEach(escala => {
+                let dataFormatada = '';
+                if(escala.data) {
+                    let partes = escala.data.split('T')[0].split('-');
+                    if(partes.length === 3) dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
+                }
+
+                // REGRA DE FILTRAGEM: Testa se a data formatada (dd/mm/aaaa) contém o termo "/mm/aaaa"
+                if (!dataFormatada.includes(termoFiltroData)) {
+                    return; // Ignora o registro e passa para a próxima linha da planilha
+                }
+
+                totalExibido++;
+
+                let turnoFormatado = `Das ${formatarHoraCustomizada(escala.inicio)} às ${formatarHoraCustomizada(escala.termino)}`;
+                let descricaoTexto = escala.descricao && escala.descricao !== "undefined" ? escala.descricao : "—";
+
+                let efetivoFormatado = "";
+                if (escala.detalheEfetivo) {
+                    let linhasEfetivo = escala.detalheEfetivo
+                        .replace(/\r?\n/g, '|')
+                        .replace(/\s*;\s*/g, '|')
+                        .replace(/\s*,\s*/g, '|')
+                        .replace(/\s*-\s*/g, '|')
+                        .split('|');
+                    
+                    efetivoFormatado = linhasEfetivo
+                        .map(linha => destacarQuantidadeEfetivo(linha.trim()))
+                        .filter(linha => linha !== "")
+                        .join('<br>');
+                } else if (escala.efetivoBruto && escala.efetivoBruto.length > 0) {
+                    efetivoFormatado = escala.efetivoBruto
+                        .map(item => `${item.posto} <span class="efetivo-destaque">(${item.qtd})</span>`)
+                        .join('<br>');
+                } else if (escala.posto && escala.qtd) {
+                    efetivoFormatado = `${escala.posto} <span class="efetivo-destaque">(${escala.qtd})</span>`;
+                }
+
+                let urlIntranet = `https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelpreesc.aspx?${escala.id}`;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight: bold; color: var(--militar-accent);">${escala.id}</td>
+                        <td>${dataFormatada}</td>
+                        <td style="white-space: nowrap;">${turnoFormatado}</td>
+                        <td style="max-width: 250px; white-space: normal; text-align: center; font-size: 9.5pt; padding: 10px; line-height: 1.4;">
+                            ${descricaoTexto}
+                        </td>
+                        <td style="font-size: 10pt; max-width: 300px; white-space: normal; line-height: 1.6; padding-top: 10px; padding-bottom: 10px; text-align: center;">
+                            ${efetivoFormatado}
+                        </td>
+                        <td style="font-weight: 600; color: #8FA192;">R$ ${parseFloat(escala.custoTotal).toFixed(2).replace('.',',')}</td>
+                        <td style="white-space: nowrap; text-align: center;">
+                            <div class="acoes-wrapper">
+                                <div class="acoes-linha-superior">
+                                    <button class="btn-tabela btn-tabela-editar" onclick="prepararEdicao('${escala.id}', '${escala.data ? escala.data.split('T')[0] : ''}', '${extrairApenasHora(escala.inicio)}', '${extrairApenasHora(escala.termino)}', '${encodeURIComponent(descricaoTexto)}', '${encodeURIComponent(JSON.stringify(escala.efetivoBruto || []))}')">Editar</button>
+                                    <button class="btn-tabela btn-tabela-excluir" onclick="deletarEscala('${escala.id}')">Excluir</button>
+                                </div>
+                                <a href="${urlIntranet}" target="_blank" class="btn-tabela btn-tabela-acessar">Acessar a Escala</a>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            // Caso existam escalas no banco, mas nenhuma corresponda ao mês/ano selecionado
+            if (totalExibido === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#D1A153; padding: 30px;">Nenhuma escala registrada para o período de ${mesSelecionado}/${anoSelecionado}.</td></tr>`;
+            }
+
+        }).catch(err => {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#A64B4B;">Erro ao carregar dados do banco de dados. Verifique a implantação do Apps Script.</td></tr>`;
+            console.error(err);
+        });
+    }
+
+    function prepararEdicao(id, data, inicio, termino, descEncoded, efetivoJson) {
+        resetarFormulario();
+
+        let desc = decodeURIComponent(descEncoded);
+
+        document.getElementById('idEscala').value = id;
+        document.getElementById('idAntigo').value = id; 
+        document.getElementById('idEscala').readOnly = false; 
+        document.getElementById('dataEscala').value = data;
+        document.getElementById('horaInicio').value = inicio;
+        document.getElementById('horaTermino').value = termino;
+        document.getElementById('descricao').value = (desc === "—" || desc === "undefined") ? "" : desc;
+        
+        try {
+            let efetivo = JSON.parse(decodeURIComponent(efetivoJson));
+            if(efetivo && efetivo.length > 0) {
+                efetivo.forEach(item => {
+                    let input = document.querySelector(`.posto-input[data-posto="${item.posto}"]`);
+                    if(input) input.value = item.qtd;
+                });
+            }
+        } catch(e) {
+            console.error("Erro ao processar efetivo para edição", e);
+        }
+
+        document.getElementById('actionType').value = "editar";
+        document.getElementById('submitBtn').innerText = "Atualizar Cadastro";
+        document.getElementById('btnCancelar').style.display = "inline-block";
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    function deletarEscala(id) {
+        if(confirm(`Confirma a EXCLUSÃO da Escala ID ${id}?`)) {
+            fetch(WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({ acao: "excluir", id: id })
+            }).then(() => {
+                alert("Escala excluída com sucesso!");
+                setTimeout(carregarEscalas, 2000);
+            });
+        }
+    }
+
+    function resetarFormulario() {
+        document.getElementById('escalaForm').reset();
+        document.getElementById('idEscala').readOnly = false;
+        document.getElementById('idAntigo').value = "";
+        document.getElementById('actionType').value = "criar";
+        document.getElementById('submitBtn').innerText = "Criar Escala";
+        document.getElementById('submitBtn').disabled = false;
+        document.getElementById('btnCancelar').style.display = "none";
+        
+        document.querySelectorAll('.posto-input').forEach(input => input.value = 0);
+    }
+
+    function extrairDadosEscalas() {
+        let btn = document.getElementById('btnExportar');
+        btn.innerText = "⏳ Processando Planilha...";
+        btn.disabled = true;
+        
+        fetch(WEB_APP_URL)
+        .then(res => res.json())
+        .then(data => {
+            if(!data || data.length === 0) {
+                alert("Nenhum registro encontrado no Google Sheets para gerar planilha.");
+                btn.innerText = "📊 Extrair Dados das Escalas";
+                btn.disabled = false;
+                return;
+            }
+            
+            let linhasCsv = [];
+            linhasCsv.push(["ID Escala", "Data", "Turno Inicio", "Turno Termino", "Missao", "Posto/Graduacao", "Tipo", "Quantidade de Militares", "Valor Individual (R$)", "Subtotal do Posto (R$)", "Custo Total Consol. (R$)"]);
+            
+            const termoFiltroData = `/${mesSelecionado}/${anoSelecionado}`;
+
+            data.forEach(escala => {
+                let dataFormatada = '';
+                if(escala.data) {
+                    let partes = escala.data.split('T')[0].split('-');
+                    if(partes.length === 3) dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
+                }
+                
+                // Aplica o filtro de mês/ano também na extração do CSV para baixar apenas o que está na tela
+                if (!dataFormatada.includes(termoFiltroData)) {
+                    return;
+                }
+                
+                let descText = escala.descricao && escala.descricao !== "undefined" ? escala.descricao.replace(/"/g, '""') : "—";
+                let hInicio = extrairApenasHora(escala.inicio);
+                let hTermino = extrairApenasHora(escala.termino);
+                let custoTotalGeral = parseFloat(escala.custoTotal).toFixed(2).replace('.', ',');
+
+                if(escala.efetivoBruto && escala.efetivoBruto.length > 0) {
+                    escala.efetivoBruto.forEach(militar => {
+                        let valorUnitario = militar.tipo === "Oficial" ? 414.96 : 353.46;
+                        let valorTotalPosto = valorUnitario * militar.qtd;
+                        
+                        linhasCsv.push([
+                            `"${escala.id}"`,
+                            `"${dataFormatada}"`,
+                            `"${hInicio}"`,
+                            `"${hTermino}"`,
+                            `"${descText}"`,
+                            `"${militar.posto}"`,
+                            `"${militar.tipo}"`,
+                            `"${militar.qtd}"`,
+                            `"${valorUnitario.toFixed(2).replace('.', ',')}"`,
+                            `"${valorTotalPosto.toFixed(2).replace('.', ',')}"`,
+                            `"${custoTotalGeral}"`
+                        ]);
+                    });
+                } else {
+                    linhasCsv.push([
+                        `"${escala.id}"`,
+                        `"${dataFormatada}"`,
+                        `"${hInicio}"`,
+                        `"${hTermino}"`,
+                        `"${descText}"`,
+                        `"Não Especificado"`,
+                        `"—"`,
+                        `"0"`,
+                        `"0,00"`,
+                        `"0,00"`,
+                        `"${custoTotalGeral}"`
+                    ]);
+                }
+            });
+            
+            if(linhasCsv.length <= 1) {
+                alert("Não há dados correspondentes a este período para exportar.");
+                btn.innerText = "📊 Extrair Dados das Escalas";
+                btn.disabled = false;
+                return;
+            }
+
+            let conteudoCsv = "\uFEFF" + linhasCsv.map(e => e.join(";")).join("\n");
+            let blob = new Blob([conteudoCsv], { type: 'text/csv;charset=utf-8;' });
+            let link = document.createElement("a");
+            let url = URL.createObjectURL(blob);
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Relatorio_Escalas_${mesSelecionado}_${anoSelecionado}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            btn.innerText = "📊 Extrair Dados das Escalas";
+            btn.disabled = false;
+        })
+        .catch(err => {
+            alert("Falha na comunicação ao tentar realizar download do arquivo.");
+            console.error(err);
+            btn.innerText = "📊 Extrair Dados das Escalas";
+            btn.disabled = false;
+        });
+    }
+
+    window.onload = carregarEscalas;
+</script>
+</body>
+</html>

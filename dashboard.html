@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Seleção</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.4/dist/umd/supabase.js"></script>
+    <style>
+        /* Alinhamento base para manter o padrão da tela de login */
+        .container {
+            text-align: center;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        /* EFEITO 3D NAS CAIXAS DE SELEÇÃO (SELECTS) */
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            font: inherit;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background-color: #fff;
+            outline: none;
+            cursor: pointer;
+            
+            /* Sombra que cria a base/profundidade 3D */
+            box-shadow: 
+                0 4px 0 0 #d5d5d5, 
+                inset 0 2px 4px rgba(0, 0, 0, 0.08);
+            
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        /* Efeito de clique/foco na caixa de seleção */
+        .form-group select:focus {
+            border-color: #4b5836;    /* Alinhado com o verde-militar */
+            transform: translateY(2px);
+            box-shadow: 
+                0 2px 0 0 #4b5836, 
+                inset 0 2px 4px rgba(0, 0, 0, 0.12);
+        }
+
+        /* EFEITO 3D NO BOTÃO CONFIRMAR (VERDE-MILITAR) */
+        #btn-confirm {
+            -webkit-appearance: none;
+            appearance: none;
+            position: relative;
+            border-width: 0;
+            padding: 10px 16px 14px;
+            width: 100%;
+            box-sizing: border-box;
+            background: transparent;
+            font: inherit;
+            cursor: pointer;
+            display: block;
+            margin: 25px auto 0 auto;
+
+            /* Camada de Texto e Topo */
+            align-items: center;
+            justify-content: center;
+            z-index: 0;
+            transform: translateY(0);
+            text-align: center;
+            color: #fff;
+            text-shadow: 0 -1px rgba(0, 0, 0, .25);
+            -webkit-user-select: none;
+            user-select: none;
+            border-radius: 4px;
+            
+            /* Gradiente Verde-Militar */
+            background-image: radial-gradient(#6b7e50, #4b5836);
+            
+            /* Profundidade 3D */
+            box-shadow: 
+                inset 0 0 0px 1px rgba(255, 255, 255, .2), 
+                0 1px 2px 1px rgba(255, 255, 255, .2),
+                0 6px 0 0 #343e24,
+                0 8px 4px 0 rgba(0, 0, 0, .15);
+            
+            transition: transform .2s, box-shadow .2s, border-radius .2s;
+        }
+        #btn-confirm:active {
+            transform: translateY(6px);
+            border-radius: 6px;
+            box-shadow: 
+                inset 0 0 0px 1px rgba(255, 255, 255, .2), 
+                0 1px 2px 1px rgba(255, 255, 255, .2),
+                0 0px 0 0 #343e24,
+                0 2px 2px 0 rgba(0, 0, 0, .15);
+        }
+
+        /* EFEITO 3D NO BOTÃO LOGOUT (VERMELHO) */
+        #btn-logout {
+            -webkit-appearance: none;
+            appearance: none;
+            position: relative;
+            border-width: 0 !important;
+            padding: 10px 16px 14px;
+            width: 100%;
+            box-sizing: border-box;
+            font: inherit;
+            cursor: pointer;
+            display: block;
+
+            align-items: center;
+            justify-content: center;
+            z-index: 0;
+            transform: translateY(0);
+            text-align: center;
+            color: #fff;
+            text-shadow: 0 -1px rgba(0, 0, 0, .25);
+            -webkit-user-select: none;
+            user-select: none;
+            border-radius: 4px;
+            
+            /* Gradiente Vermelho */
+            background-image: radial-gradient(#ef4444, #dc2626) !important;
+            
+            /* Profundidade 3D Vermelha */
+            box-shadow: 
+                inset 0 0 0px 1px rgba(255, 255, 255, .2), 
+                0 1px 2px 1px rgba(255, 255, 255, .2),
+                0 6px 0 0 #991b1b,
+                0 8px 4px 0 rgba(0, 0, 0, .15);
+            
+            transition: transform .2s, box-shadow .2s, border-radius .2s;
+        }
+        #btn-logout:active {
+            transform: translateY(6px);
+            border-radius: 6px;
+            box-shadow: 
+                inset 0 0 0px 1px rgba(255, 255, 255, .2), 
+                0 1px 2px 1px rgba(255, 255, 255, .2),
+                0 0px 0 0 #991b1b,
+                0 2px 2px 0 rgba(0, 0, 0, .15);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Selecione o Período</h2>
+        
+        <div class="form-group">
+            <label for="select-month">Mês</label>
+            <select id="select-month">
+                <option value="01">Janeiro</option>
+                <option value="02">Fevereiro</option>
+                <option value="03">Março</option>
+                <option value="04">Abril</option>
+                <option value="05">Maio</option>
+                <option value="06">Junho</option>
+                <option value="07">Julho</option>
+                <option value="08">Agosto</option>
+                <option value="09">Setembro</option>
+                <option value="10">Outubro</option>
+                <option value="11">Novembro</option>
+                <option value="12">Dezembro</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="select-year">Ano</label>
+            <select id="select-year">
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+                <option value="2028">2028</option>
+                <option value="2029">2029</option>
+                <option value="2030">2030</option>
+            </select>
+        </div>
+
+        <button id="btn-confirm">Confirmar Seleção</button>
+        <button id="btn-logout" style="background-color: #ef4444; margin-top: 10px;">Sair</button>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://yiabgfhtvevrrtfyhjxd.supabase.co"; 
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpYWJnZmh0dmV2cnJ0ZnloanhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDg4OTAsImV4cCI6MjA5NDEyNDg5MH0.th7vVdBYGI5TmegMNP4JC66doOvSIWXjSgFGhAHpNzM"; // Certifique-se de colocar sua chave real aqui
+        
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // PROTEÇÃO DA PÁGINA
+        async function checkUser() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.assign("index.html");
+            }
+        }
+        checkUser();
+
+        // AÇÃO DO BOTÃO CONFIRMAR (Redirecionamento com parâmetros)
+        document.getElementById('btn-confirm').addEventListener('click', () => {
+            const mes = document.getElementById('select-month').value;
+            const ano = document.getElementById('select-year').value;
+            
+            // Redireciona passando o mês e ano na URL
+            window.location.assign(`controlDelegada.html?mes=${mes}&ano=${ano}`);
+        });
+
+        // AÇÃO DE LOGOUT
+        document.getElementById('btn-logout').addEventListener('click', async () => {
+            await supabaseClient.auth.signOut();
+            window.location.assign("index.html");
+        });
+    </script>
+</body>
+</html>

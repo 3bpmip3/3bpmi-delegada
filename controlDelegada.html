@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro de Controle de Escalas - Atividade Delegada</title>
+
+    <style>
+        :root {
+            --cinza-bandeirante: #545A5C;
+            --cinza-escuro: #313536;
+            --cinza-claro: #7A8184;
+            --militar-accent: #8FA192;
+            --militar-borda: #4b5836;
+            --militar-gradient-light: #6b7e50;
+            --militar-gradient-dark: #4b5836;
+            --militar-profundidade: #343e24;
+            --text-light: #F4F5F5;
+            --glass-bg: rgba(84, 90, 92, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --glass-glow: rgba(143, 161, 146, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--cinza-escuro) 0%, var(--cinza-bandeirante) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            padding: 30px 20px 80px;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid var(--militar-accent);
+            padding-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        header h1 { font-size: 24pt; color: var(--text-light); }
+        header p  { font-size: 10pt; color: var(--militar-accent); margin-top: 5px; }
+
+        /* NOVA ESTRUTURA DIVIDIDA EM DUAS COLUNAS PRINCIPAIS */
+        .painel-superior-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 25px;
+        }
+
+        .coluna-esquerda-dados {
+            flex: 1;
+        }
+
+        .coluna-direita-financeiro {
+            width: 260px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: stretch;
+        }
+
+        /* BLOCOS FINANCEIROS COMPACTOS E MENORES */
+        .financeiro-bloco-vertical {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            padding: 8px 12px;
+            border: 1px solid var(--glass-border);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .financeiro-bloco-vertical label {
+            font-size: 8pt;
+            margin-bottom: 4px;
+        }
+
+        .financeiro-bloco-vertical input {
+            padding: 6px 8px !important;
+            font-size: 9.5pt !important;
+            box-shadow: 0 2px 0 0 #d5d5d5, inset 0 1px 2px rgba(0,0,0,0.08) !important;
+        }
+        .financeiro-bloco-vertical input:focus {
+            box-shadow: 0 1px 0 0 var(--militar-borda), inset 0 1px 2px rgba(0,0,0,0.12) !important;
+            transform: translateY(1px);
+        }
+
+        .financeiro-input-wrapper {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        h2 {
+            font-size: 14pt;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--militar-accent);
+            border-left: 4px solid var(--militar-accent);
+            padding-left: 10px;
+            margin-bottom: 20px;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px 0 rgba(0,0,0,0.37);
+        }
+
+        .form-row  { display: table; width: 100%; margin-bottom: 15px; }
+        .form-col  { display: table-cell; width: 50%; padding-right: 15px; vertical-align: top; }
+        .form-col:last-child { padding-right: 0; }
+        .form-group { margin-bottom: 5px; }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 9.5pt;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="time"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 11px;
+            font: inherit;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background-color: #fff;
+            color: #333;
+            outline: none;
+            box-shadow: 0 4px 0 0 #d5d5d5, inset 0 2px 4px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        input:focus, textarea:focus {
+            border-color: var(--militar-borda);
+            transform: translateY(2px);
+            background-color: #fff;
+            color: #333;
+            box-shadow: 0 2px 0 0 var(--militar-borda), inset 0 2px 4px rgba(0, 0, 0, 0.12);
+        }
+
+        input:disabled, input[readonly] {
+            background-color: #e9ecef;
+            color: #495057;
+            cursor: not-allowed;
+            box-shadow: 0 4px 0 0 #cbd5e1;
+        }
+
+        .efetivo-section {
+            margin-top: 25px;
+            border-top: 1px dashed var(--glass-border);
+            padding-top: 20px;
+        }
+        .efetivo-grid   { display: block; margin-bottom: 20px; }
+        .efetivo-bloco  { margin-bottom: 20px; }
+        .efetivo-titulo-grupo {
+            font-size: 11pt;
+            font-weight: bold;
+            color: var(--militar-accent);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(143,161,146,0.3);
+            padding-bottom: 4px;
+        }
+        .postos-container { display: table; width: 100%; table-layout: fixed; }
+        .posto-item  { display: table-cell; padding: 5px; text-align: center; }
+        .posto-label {
+            display: block;
+            font-size: 9pt;
+            margin-bottom: 6px;
+            color: var(--text-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .posto-input { width: 100%; text-align: center; }
+
+        .btn-container { text-align: right; margin-top: 25px; }
+
+        button {
+            -webkit-appearance: none;
+            appearance: none;
+            position: relative;
+            font: inherit;
+            cursor: pointer;
+            border-width: 0;
+            text-shadow: 0 -1px rgba(0, 0, 0, .25);
+            -webkit-user-select: none;
+            user-select: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 0;
+            transform: translateY(0);
+        }
+
+        .btn-principal {
+            padding: 10px 24px 14px;
+            font-size: 11pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            color: #fff;
+            background-image: radial-gradient(var(--militar-gradient-light), var(--militar-gradient-dark));
+            box-shadow: inset 0 0px 0px 1px rgba(255, 255, 255, .2), 0 1px 2px 1px rgba(255, 255, 255, .2), 0 6px 0 0 var(--militar-profundidade), 0 8px 4px 0 rgba(0, 0, 0, .15);
+            transition: transform .2s, box-shadow .2s, border-radius .2s;
+        }
+        .btn-principal:active {
+            transform: translateY(6px);
+            border-radius: 6px;
+            box-shadow: inset 0 0px 0px 1px rgba(255, 255, 255, .2), 0 1px 2px 1px rgba(255, 255, 255, .2), 0 0px 0 0 var(--militar-profundidade), 0 2px 2px 0 rgba(0, 0, 0, .15);
+        }
+
+        .btn-secundario {
+            padding: 10px 24px 14px;
+            font-size: 11pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            color: #fff;
+            background-image: radial-gradient(#7A8184, #545A5C);
+            margin-right: 10px;
+            box-shadow: inset 0 0px 0px 1px rgba(255, 255, 255, .2), 0 1px 2px 1px rgba(255, 255, 255, .2), 0 6px 0 0 #313536, 0 8px 4px 0 rgba(0, 0, 0, .15);
+            transition: transform .2s, box-shadow .2s, border-radius .2s;
+        }
+        .btn-secundario:active {
+            transform: translateY(6px);
+            border-radius: 6px;
+            box-shadow: inset 0 0px 0px 1px rgba(255, 255, 255, .2), 0 1px 2px 1px rgba(255, 255, 255, .2), 0 0px 0 0 #313536, 0 2px 2px 0 rgba(0, 0, 0, .15);
+        }
+
+        .btn-voltar {
+            padding: 6px 12px 9px;
+            font-size: 8.5pt;
+            border-radius: 4px;
+            color: var(--text-light);
+            background-image: radial-gradient(#474d4f, #252829);
+            box-shadow: inset 0 0px 0px 1px rgba(255, 255, 255, .1), 0 3px 0 0 #121414, 0 5px 2px 0 rgba(0, 0, 0, .2);
+            transition: transform .2s, box-shadow .2s;
+            margin-bottom: 5px;
+            width: 100%;
+            text-align: center;
+        }
+        .btn-voltar:active {
+            transform: translateY(3px);
+            box-shadow: inset 0 0px 0px 1px rgba(255, 255, 255, .1), 0 0px 0 0 #121414, 0 1px 1px 0 rgba(0, 0, 0, .2);
+        }
+
+        .btn-financeiro {
+            padding: 6px 10px 9px;
+            font-size: 8.5pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 4px;
+            color: #1a1a1a;
+            background-image: radial-gradient(#e0b363, #D1A153);
+            white-space: nowrap;
+            box-shadow: 0 3px 0 0 #8c6830, 0 4px 2px rgba(0,0,0,0.2);
+            transition: transform .2s, box-shadow .2s;
+        }
+        .btn-financeiro:active {
+            transform: translateY(3px);
+            box-shadow: 0 0px 0 0 #8c6830, 0 1px 1px rgba(0,0,0,0.2);
+        }
+
+        .table-responsive { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10pt; }
+        th {
+            background: rgba(0,0,0,0.4);
+            color: var(--militar-accent);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            padding: 12px;
+            border-bottom: 2px solid var(--militar-accent);
+            text-align: center;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--glass-border);
+            color: var(--text-light);
+            vertical-align: middle;
+            text-align: center;
+        }
+        tr:hover td { background: rgba(255,255,255,0.03); }
+
+        .acoes-wrapper     { display: inline-block; text-align: center; }
+        .acoes-linha-superior { margin-bottom: 6px; display: block; }
+
+        .btn-tabela {
+            padding: 5px 10px 8px;
+            font-size: 8.5pt;
+            letter-spacing: 0.5px;
+            border-radius: 4px;
+            display: inline-block;
+            text-decoration: none;
+            font-weight: bold;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            text-shadow: 0 -1px rgba(0, 0, 0, .2);
+            transition: transform .15s, box-shadow .15s;
+        }
+        .btn-tabela:active { transform: translateY(3px) !important; }
+        
+        .btn-tabela-acessar    { 
+            background-image: radial-gradient(#4a8691, #3A6B73); 
+            color: white; 
+            width: 100%; 
+            box-sizing: border-box;
+            box-shadow: 0 3px 0 0 #1f3a3f, 0 4px 3px rgba(0,0,0,0.2);
+        }
+        .btn-tabela-acessar:active { box-shadow: 0 0px 0 0 #1f3a3f, 0 1px 1px rgba(0,0,0,0.2); }
+        
+        .btn-tabela-editar     { 
+            background-image: radial-gradient(#e0b363, #D1A153); 
+            color: #1a1a1a; 
+            margin-right: 3px; 
+            box-shadow: 0 3px 0 0 #8c6830, 0 4px 3px rgba(0,0,0,0.2);
+        }
+        .btn-tabela-editar:active { box-shadow: 0 0px 0 0 #8c6830, 0 1px 1px rgba(0,0,0,0.2); }
+        
+        .btn-tabela-excluir    { 
+            background-image: radial-gradient(#b85c5c, #A64B4B); 
+            color: white;
+            box-shadow: 0 3px 0 0 #612828, 0 4px 3px rgba(0,0,0,0.2);
+        }
+        .btn-tabela-excluir:active { box-shadow: 0 0px 0 0 #612828, 0 1px 1px rgba(0,0,0,0.2); }
+
+        .efetivo-destaque { color: #8FA192; font-weight: bold; }
+
+        .loading { text-align: center; padding: 20px; color: var(--militar-accent); font-style: italic; letter-spacing: 1px; }
+
+        #toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #2a3d2e;
+            border: 1px solid var(--militar-accent);
+            color: var(--text-light);
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 11pt;
+            font-weight: 600;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 99999;
+            white-space: nowrap;
+        }
+        #toast.erro { background: #3d2a2a; border-color: #A64B4B; }
+        #toast.visivel { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        #overlay-loading {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 9998;
+            justify-content: center;
+            align-items: center;
+        }
+        #overlay-loading.ativo { display: flex; }
+        .spinner {
+            width: 48px; height: 48px;
+            border: 5px solid rgba(143,161,146,0.3);
+            border-top-color: var(--militar-accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .btn-flutuante-extracao {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            color: white;
+            padding: 12px 22px 16px;
+            font-size: 10pt;
+            border-radius: 50px;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            background-image: radial-gradient(#46818A, #3A6B73);
+            box-shadow: inset 0 0px 0px 1px rgba(255, 255, 255, .2), 0 1px 2px 1px rgba(255, 255, 255, .2), 0 6px 0 0 #1f3a3f, 0 8px 4px 0 rgba(0, 0, 0, .2);
+            transition: transform .2s, box-shadow .2s;
+        }
+        .btn-flutuante-extracao:active {
+            transform: translateY(6px);
+            box-shadow: inset 0 0px 0px 1px rgba(255, 255, 255, .2), 0 1px 2px 1px rgba(255, 255, 255, .2), 0 0px 0 0 #1f3a3f, 0 2px 2px 0 rgba(0, 0, 0, .2);
+        }
+    </style>
+</head>
+<body>
+
+<div id="overlay-loading"><div class="spinner"></div></div>
+<div id="toast"></div>
+
+<div class="container">
+    <header>
+        <h1>3º Batalhão de Caçadores</h1>
+        <p>Atividade Delegada • Ribeirão Preto</p>
+    </header>
+
+    <div class="glass-card">
+        <div class="painel-superior-container">
+            
+            <div class="coluna-esquerda-dados">
+                <h2>Registro de Escala</h2>
+                
+                <form id="escalaForm">
+                    <input type="hidden" id="actionType" value="criar">
+                    <input type="hidden" id="idAntigo" value="">
+
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="idEscala">ID Escala:</label>
+                                <input type="text" id="idEscala" pattern="\d{7}" required maxlength="7" placeholder="Digite a ID">
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="dataEscala">Data:</label>
+                                <input type="date" id="dataEscala" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="horaInicio">Hora Início:</label>
+                                <input type="time" id="horaInicio" required oninput="calcularTermino()">
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="horaTermino">Hora Término:</label>
+                                <input type="time" id="horaTermino" readonly>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            
+            <div class="coluna-direita-financeiro">
+                <button type="button" class="btn-voltar" onclick="window.location.assign('dashboard.html')">← Voltar ao Dashboard</button>
+                
+                <div class="financeiro-bloco-vertical">
+                    <div class="form-group">
+                        <label for="valorLiberado">Valor Liberado (R$):</label>
+                        <div class="financeiro-input-wrapper">
+                            <input type="number" id="valorLiberado" step="0.01" min="0" value="0.00" disabled onchange="salvarEAtualizarFinanceiro()">
+                            <button type="button" id="btnEditarFinanceiro" class="btn-financeiro" onclick="toggleEditarFinanceiro()">Editar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="financeiro-bloco-vertical">
+                    <div class="form-group">
+                        <label for="valorUtilizado">Valor Utilizado (R$):</label>
+                        <input type="text" id="valorUtilizado" readonly value="R$ 0,00">
+                    </div>
+                </div>
+
+                <div class="financeiro-bloco-vertical">
+                    <div class="form-group">
+                        <label for="valorDisponivel">Valor Disponível (R$):</label>
+                        <input type="text" id="valorDisponivel" readonly value="R$ 0,00" style="font-weight: bold;">
+                    </div>
+                </div>
+            </div>
+
+        </div> <div class="efetivo-section">
+                <label style="color: var(--militar-accent); margin-bottom: 15px;">Distribuição de Efetivo:</label>
+
+                <div class="efetivo-grid">
+                    <div class="efetivo-bloco">
+                        <div class="efetivo-titulo-grupo">Oficiais — Valor Unitário: R$ 414,96</div>
+                        <div class="postos-container">
+                            <div class="posto-item">
+                                <span class="posto-label">Cel PM</span>
+                                <input type="number" min="" value="" class="posto-input" data-posto="Cel PM" data-tipo="Oficial">
+                            </div>
+                            <div class="posto-item">
+                                <span class="posto-label">Ten Cel PM</span>
+                                <input type="number" min="" value="" class="posto-input" data-posto="Ten Cel PM" data-tipo="Oficial">
+                            </div>
+                            <div class="posto-item">
+                                <span class="posto-label">Maj PM</span>
+                                <input type="number" min="" value="" class="posto-input" data-posto="Maj PM" data-tipo="Oficial">
+                            </div>
+                            <div class="posto-item">
+                                <span class="posto-label">Cap PM</span>
+                                <input type="number" min="" value="" class="posto-input" data-posto="Cap PM" data-tipo="Oficial">
+                            </div>
+                            <div class="posto-item">
+                                <span class="posto-label">1º Ten PM</span>
+                                <input type="number" min="" value="" class="posto-input" data-posto="1º Ten PM" data-tipo="Oficial">
+                            </div>
+                            <div class="posto-item">
+                                <span class="posto-label">2º Ten PM</span>
+                                <input type="number" min="" value="" class="posto-input" data-posto="2º Ten PM" data-tipo="Oficial">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="efetivo-bloco">
+                        <div class="efetivo-titulo-grupo">Praças — Valor Unitário: R$ 353,46</div>
+                        <div class="postos-container">
+                            <div class="posto-item">
+                                <span class="posto-label">Subten PM</span>
+                                <input type="number" min="" value="" class="posto-input" data-posto="Subten PM" data-tipo="Praça">
+                            </div>
+                            <div class="posto-item">
+                                <span class="posto-label">1º Sgt PM</span>
+                                <input type="number" min="" value="" class="posto-input" data-posto="1º Sgt PM" data-tipo="Praça">
+                            </div>
+                            <div class="posto-item">
+                                <span class="posto-label">2º Sgt PM</span>
+                                <input type="number" min="" value="" class="posto-input" data-posto="2º Sgt PM" data-tipo="Praça">
+                            </div>
+                            <div class="posto-item">
+                                <span class="posto-label">3º Sgt PM</span>
+                                <input type="number" min="" value="" class="posto-input" data-posto="3º Sgt PM" data-tipo="Praça">
+                            </div>
+                            <div class="posto-item">
+                                <span class="posto-label">Cb PM</span>
+                                <input type="number" min="" value="" class="posto-input" data-posto="Cb PM" data-tipo="Praça">
+                            </div>
+                            <div class="posto-item">
+                                <span class="posto-label">Sd PM</span>
+                                <input type="number" min="" value="" class="posto-input" data-posto="Sd PM" data-tipo="Praça">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 20px;">
+                <label for="descricao">Missão/Descrição da Escala:</label>
+                <textarea id="descricao" rows="3" placeholder="Insira o detalhamento da missão e locais de atuação..."></textarea>
+            </div>
+
+            <div class="btn-container">
+                <button type="button" id="btnCancelar" class="btn-secundario" style="display:none;" onclick="resetarFormulario()">Cancelar</button>
+                <button type="submit" id="submitBtn" class="btn-principal">Criar Escala</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="glass-card">
+        <h2 id="tituloTabela">Escalas Registradas no Google Sheets</h2>
+        <div class="table-responsive">
+            <table id="tabelaEscalas">
+                <thead>
+                    <tr>
+                        <th>ID Escala</th>
+                        <th>Data</th>
+                        <th>Turno</th>
+                        <th>Missão/Descrição</th>
+                        <th>Distribuição de Efetivo</th>
+                        <th>Custo Estimado da Escala</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="corpoTabela">
+                    <tr><td colspan="7" class="loading">Aguardando conexão com a central de dados...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<button type="button" id="btnExportar" class="btn-flutuante-extracao" onclick="extrairDadosEscalas()">
+    📊 Extrair Dados das Escalas
+</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script>
+    /* ============================================================
+       CONFIGURAÇÃO
+    ============================================================ */
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxfxbwoUAMfVU99LqFcOT7Nt4K6a4QVTQrA-TDj7r1m38Uuie4FhmJhnhBBKPtKWiNTsA/exec";
+
+    const urlParams      = new URLSearchParams(window.location.search);
+    const mesSelecionado = urlParams.get('mes');
+    const anoSelecionado = urlParams.get('ano');
+
+    if (!mesSelecionado || !anoSelecionado) {
+        alert("Período de busca não especificado. Retornando ao menu de seleção.");
+        window.location.assign('dashboard.html');
+    }
+
+    document.getElementById('tituloTabela').innerText =
+        `Escalas Filtradas para o Período: ${mesSelecionado}/${anoSelecionado}`;
+
+    /* ============================================================
+       LÓGICA DO PAINEL FINANCEIRO
+    ============================================================ */
+    let totalCustoUtilizadoGlobal = 0;
+    const storageKeyFinanceiro = `valorLiberado_${mesSelecionado}_${anoSelecionado}`;
+
+    function inicializarFinanceiro() {
+        const valorSalvo = localStorage.getItem(storageKeyFinanceiro);
+        if (valorSalvo !== null) {
+            document.getElementById('valorLiberado').value = parseFloat(valorSalvo).toFixed(2);
+        } else {
+            document.getElementById('valorLiberado').value = "0.00";
+        }
+        recalcularValoresFinanceiros();
+    }
+
+    function toggleEditarFinanceiro() {
+        const inputLiberado = document.getElementById('valorLiberado');
+        const btnEditar = document.getElementById('btnEditarFinanceiro');
+        
+        if (inputLiberado.disabled) {
+            inputLiberado.disabled = false;
+            inputLiberado.focus();
+            btnEditar.innerText = "Salvar";
+        } else {
+            inputLiberado.disabled = true;
+            btnEditar.innerText = "Editar";
+            salvarEAtualizarFinanceiro();
+        }
+    }
+
+    function salvarEAtualizarFinanceiro() {
+        const valorVal = parseFloat(document.getElementById('valorLiberado').value) || 0;
+        localStorage.setItem(storageKeyFinanceiro, valorVal);
+        recalcularValoresFinanceiros();
+    }
+
+    function recalcularValoresFinanceiros() {
+        const valorLiberado = parseFloat(document.getElementById('valorLiberado').value) || 0;
+        const valorDisponivel = valorLiberado - totalCustoUtilizadoGlobal;
+
+        document.getElementById('valorUtilizado').value = `R$ ${totalCustoUtilizadoGlobal.toFixed(2).replace('.', ',')}`;
+        document.getElementById('valorDisponivel').value = `R$ ${valorDisponivel.toFixed(2).replace('.', ',')}`;
+        
+        const inputDisponivel = document.getElementById('valorDisponivel');
+        if (valorDisponivel < 0) {
+            inputDisponivel.style.color = "#b85c5c";
+        } else {
+            inputDisponivel.style.color = "#8FA192";
+        }
+    }
+
+    /* ============================================================
+       UTILIDADES
+    ============================================================ */
+    function mostrarLoading(ativo) {
+        document.getElementById('overlay-loading').classList.toggle('ativo', ativo);
+    }
+
+    let toastTimer = null;
+    function mostrarToast(msg, tipo = 'ok') {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = tipo === 'erro' ? 'erro visivel' : 'visivel';
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => { t.className = ''; }, 3500);
+    }
+
+    function calcularTermino() {
+        const inicio = document.getElementById('horaInicio').value;
+        if (inicio) {
+            const [h, m] = inicio.split(':');
+            const hFim = ((parseInt(h) + 8) % 24).toString().padStart(2, '0');
+            document.getElementById('horaTermino').value = `${hFim}:${m}`;
+        } else {
+            document.getElementById('horaTermino').value = "";
+        }
+    }
+
+    function extrairApenasHora(str) {
+        if (!str) return "00:00";
+        const s = str.includes('T') ? str.split('T')[1] : str;
+        return s.substring(0, 5);
+    }
+
+    function formatarHoraCustomizada(raw) {
+        const h = extrairApenasHora(raw);
+        const [hh, mm] = h.split(':');
+        return mm === "00" ? `${parseInt(hh)}h` : `${hh}h${mm}`;
+    }
+
+    /* ============================================================
+       ENVIO AO APPS SCRIPT
+    ============================================================ */
+    function enviarViaFormulario(dados, callback) {
+        const iframeId = 'gas-iframe-' + Date.now();
+        const iframe   = document.createElement('iframe');
+        iframe.name    = iframeId;
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+
+        const form   = document.createElement('form');
+        form.method  = 'POST';
+        form.action  = WEB_APP_URL;
+        form.target  = iframeId;
+        form.style.display = 'none';
+
+        const campo  = document.createElement('input');
+        campo.type   = 'hidden';
+        campo.name   = 'payload';
+        campo.value  = encodeURIComponent(JSON.stringify(dados));
+        form.appendChild(campo);
+
+        document.body.appendChild(form);
+
+        let chamouCallback = false;
+        const onLoad = () => {
+            if (chamouCallback) return;
+            chamouCallback = true;
+            setTimeout(() => {
+                document.body.removeChild(form);
+                document.body.removeChild(iframe);
+            }, 500);
+            if (callback) callback();
+        };
+
+        iframe.addEventListener('load', onLoad);
+        setTimeout(onLoad, 12000);
+
+        form.submit();
+    }
+
+    /* ============================================================
+       SUBMIT DO FORMULÁRIO
+    ============================================================ */
+    document.getElementById('escalaForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const acao = document.getElementById('actionType').value;
+
+        const efetivoDistribuido = [];
+        document.querySelectorAll('.posto-input').forEach(input => {
+            const qtd = parseInt(input.value) || 0;
+            if (qtd > 0) {
+                efetivoDistribuido.push({
+                    posto: input.getAttribute('data-posto'),
+                    tipo:  input.getAttribute('data-tipo'),
+                    qtd:   qtd
+                });
+            }
+        });
+
+        if (efetivoDistribuido.length === 0) {
+            mostrarToast("Insira a quantidade de pelo menos 1 policial.", 'erro');
+            return;
+        }
+
+        const dados = {
+            acao:      acao,
+            id:        document.getElementById('idEscala').value.trim(),
+            idAntigo:  document.getElementById('idAntigo').value.trim(),
+            data:      document.getElementById('dataEscala').value,
+            inicio:    document.getElementById('horaInicio').value,
+            termino:   document.getElementById('horaTermino').value,
+            efetivo:   JSON.stringify(efetivoDistribuido),
+            descricao: document.getElementById('descricao').value
+        };
+
+        const btn = document.getElementById('submitBtn');
+        btn.innerText = "Processando...";
+        btn.disabled  = true;
+        mostrarLoading(true);
+
+        enviarViaFormulario(dados, () => {
+            mostrarLoading(false);
+            mostrarToast(acao === 'criar' ? "✅ Escala criada com sucesso!" : "✅ Escala atualizada com sucesso!");
+            resetarFormulario();
+            setTimeout(carregarEscalas, 2000);
+        });
+    });
+
+    /* ============================================================
+       CARREGAR ESCALAS (GET)
+    ============================================================ */
+    function carregarEscalas() {
+        const tbody = document.getElementById('corpoTabela');
+        tbody.innerHTML = `<tr><td colspan="7" class="loading">Consultando planilhas e filtrando dados para ${mesSelecionado}/${anoSelecionado}...</td></tr>`;
+
+        fetch(WEB_APP_URL)
+            .then(res => res.json())
+            .then(data => {
+                tbody.innerHTML = "";
+                totalCustoUtilizadoGlobal = 0;
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Nenhuma escala cadastrada no banco de dados.</td></tr>`;
+                    recalcularValoresFinanceiros();
+                    return;
+                }
+
+                const termoFiltro = `/${mesSelecionado}/${anoSelecionado}`;
+                let totalExibido  = 0;
+
+                data.forEach(escala => {
+                    let dataFormatada = '';
+                    if (escala.data) {
+                        const partes = escala.data.split('T')[0].split('-');
+                        if (partes.length === 3) dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
+                    }
+
+                    if (!dataFormatada.includes(termoFiltro)) return;
+                    totalExibido++;
+
+                    totalCustoUtilizadoGlobal += parseFloat(escala.custoTotal) || 0;
+
+                    const turnoFormatado   = `Das ${formatarHoraCustomizada(escala.inicio)} às ${formatarHoraCustomizada(escala.termino)}`;
+                    const descricaoTexto   = (escala.descricao && escala.descricao !== "undefined") ? escala.descricao : "—";
+
+                    let efetivoFormatado = "";
+                    if (escala.efetivoBruto && escala.efetivoBruto.length > 0) {
+                        efetivoFormatado = escala.efetivoBruto
+                            .map(item => `${item.posto} <span class="efetivo-destaque">(${item.qtd})</span>`)
+                            .join('<br>');
+                    }
+
+                    const urlIntranet = `https://sistemasadmin.intranet.policiamilitar.sp.gov.br/Escala/arrelpreesc.aspx?${escala.id}`;
+
+                    const efetivoAttr  = encodeURIComponent(JSON.stringify(escala.efetivoBruto || []));
+                    const descAttr     = encodeURIComponent(descricaoTexto);
+                    const dataAttr     = escala.data ? escala.data.split('T')[0] : '';
+                    const inicioAttr   = extrairApenasHora(escala.inicio);
+                    const terminoAttr  = extrairApenasHora(escala.termino);
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="font-weight:bold; color:var(--militar-accent);">${escala.id}</td>
+                            <td>${dataFormatada}</td>
+                            <td style="white-space:nowrap;">${turnoFormatado}</td>
+                            <td style="max-width:250px; white-space:normal; text-align:center; font-size:9.5pt; padding:10px; line-height:1.4;">${descricaoTexto}</td>
+                            <td style="font-size:10pt; max-width:300px; white-space:normal; line-height:1.6; padding:10px; text-align:center;">${efetivoFormatado}</td>
+                            <td style="font-weight:600; color:#8FA192;">R$ ${parseFloat(escala.custoTotal).toFixed(2).replace('.', ',')}</td>
+                            <td style="white-space:nowrap; text-align:center;">
+                                <div class="acoes-wrapper">
+                                    <div class="acoes-linha-superior">
+                                        <button class="btn-tabela btn-tabela-editar"
+                                            onclick="prepararEdicao(
+                                                '${escala.id}',
+                                                '${dataAttr}',
+                                                '${inicioAttr}',
+                                                '${terminoAttr}',
+                                                '${descAttr}',
+                                                '${efetivoAttr}'
+                                            )">Editar</button>
+                                        <button class="btn-tabela btn-tabela-excluir" onclick="deletarEscala('${escala.id}')">Excluir</button>
+                                    </div>
+                                    <a href="${urlIntranet}" target="_blank" class="btn-tabela btn-tabela-acessar">Acessar a Escala</a>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                if (totalExibido === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#D1A153; padding:30px;">Nenhuma escala registrada para o período de ${mesSelecionado}/${anoSelecionado}.</td></tr>`;
+                }
+
+                recalcularValoresFinanceiros();
+            })
+            .catch(err => {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#A64B4B;">Erro ao carregar dados. Verifique a implantação do Apps Script.</td></tr>`;
+                console.error(err);
+                recalcularValoresFinanceiros();
+            });
+    }
+
+    /* ============================================================
+       PREPARAR EDIÇÃO
+    ============================================================ */
+    function prepararEdicao(id, data, inicio, termino, descEncoded, efetivoJson) {
+        resetarFormulario();
+        const desc = decodeURIComponent(descEncoded);
+
+        document.getElementById('idEscala').value   = id;
+        document.getElementById('idAntigo').value   = id;
+        document.getElementById('dataEscala').value  = data;
+        document.getElementById('horaInicio').value  = inicio;
+        document.getElementById('horaTermino').value = termino;
+        document.getElementById('descricao').value   = (desc === "—" || desc === "undefined") ? "" : desc;
+
+        try {
+            const efetivo = JSON.parse(decodeURIComponent(efetivoJson));
+            if (efetivo && efetivo.length > 0) {
+                efetivo.forEach(item => {
+                    const input = document.querySelector(`.posto-input[data-posto="${item.posto}"]`);
+                    if (input) input.value = item.qtd;
+                });
+            }
+        } catch (e) {
+            console.error("Erro ao mapear efetivo para edição:", e);
+        }
+
+        document.getElementById('actionType').value    = "editar";
+        document.getElementById('submitBtn').innerText = "Atualizar Escala";
+        document.getElementById('btnCancelar').style.display = "inline-block";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ============================================================
+       DELETAR ESCALA
+    ============================================================ */
+    function deletarEscala(id) {
+        if (!confirm(`Confirma a EXCLUSÃO da Escala ID ${id}?`)) return;
+        mostrarLoading(true);
+
+        enviarViaFormulario({ acao: "excluir", id: id }, () => {
+            mostrarLoading(false);
+            mostrarToast("🗑️ Escala excluída com sucesso!");
+            setTimeout(carregarEscalas, 2000);
+        });
+    }
+
+    /* ============================================================
+       RESETAR FORMULÁRIO
+    ============================================================ */
+    function resetarFormulario() {
+        document.getElementById('escalaForm').reset();
+        document.getElementById('idAntigo').value    = "";
+        document.getElementById('actionType').value  = "criar";
+        document.getElementById('submitBtn').innerText = "Criar Escala";
+        document.getElementById('submitBtn').disabled  = false;
+        document.getElementById('btnCancelar').style.display = "none";
+        document.querySelectorAll('.posto-input').forEach(i => i.value = 0);
+    }
+
+    /* ============================================================
+       EXPORTAR EXCEL (.xlsx)
+    ============================================================ */
+    function extrairDadosEscalas() {
+        const btn = document.getElementById('btnExportar');
+        btn.innerText = "⏳ Processando...";
+        btn.disabled  = true;
+
+        fetch(WEB_APP_URL)
+            .then(res => res.json())
+            .then(async data => {
+                if (!data || data.length === 0) {
+                    mostrarToast("Nenhum registro encontrado.", 'erro');
+                    btn.innerText = "📊 Extrair Dados das Escalas";
+                    btn.disabled  = false;
+                    return;
+                }
+
+                const termoFiltro = `/${mesSelecionado}/${anoSelecionado}`;
+                const blocos = [];
+                let totalCustoPeriodo = 0;
+
+                data.forEach(escala => {
+                    let dataFormatada = '';
+                    if (escala.data) {
+                        const p = escala.data.split('T')[0].split('-');
+                        if (p.length === 3) dataFormatada = `${p[2]}/${p[1]}/${p[0]}`;
+                    }
+                    if (!dataFormatada.includes(termoFiltro)) return;
+
+                    const desc        = (escala.descricao && escala.descricao !== "undefined") ? escala.descricao : "—";
+                    const hInicio     = extrairApenasHora(escala.inicio);
+                    const hTermino    = extrairApenasHora(escala.termino);
+                    const custoGeral  = parseFloat(escala.custoTotal) || 0;
+
+                    totalCustoPeriodo += custoGeral;
+
+                    const lines = [];
+                    if (escala.efetivoBruto && escala.efetivoBruto.length > 0) {
+                        escala.efetivoBruto.forEach(m => {
+                            const vUnit  = m.tipo === "Oficial" ? 414.96 : 353.46;
+                            const vTotal = vUnit * (parseInt(m.qtd) || 0);
+                            lines.push({
+                                posto: m.posto, tipo: m.tipo, qtd: (parseInt(m.qtd) || 0),
+                                vUnit: vUnit, vTotal: vTotal
+                            });
+                        });
+                    } else {
+                        lines.push({
+                            posto: "Não Especificado", tipo: "—", qtd: 0, vUnit: 0, vTotal: 0
+                        });
+                    }
+
+                    blocos.push({
+                        id: escala.id,
+                        data: dataFormatada,
+                        turnoInicio: hInicio,
+                        turnoTermino: hTermino,
+                        missao: desc,
+                        custoTotal: custoGeral,
+                        linhas: lines
+                    });
+                });
+
+                if (blocos.length === 0) {
+                    mostrarToast("Não há dados para este período.", 'erro');
+                    btn.innerText = "📊 Extrair Dados das Escalas";
+                    btn.disabled  = false;
+                    return;
+                }
+
+                // Captura os valores financeiros atuais da interface
+                const vLiberado   = parseFloat(document.getElementById('valorLiberado').value) || 0;
+                const vUtilizado  = totalCustoPeriodo;
+                const vDisponivel = vLiberado - vUtilizado;
+
+                const workbook  = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet("Escalas");
+
+                // --- INSERÇÃO DO PAINEL FINANCEIRO NO INÍCIO DA PLANILHA ---
+                worksheet.addRow(["PAINEL FINANCEIRO DO PERÍODO", "", "", "", "", "", "", "", "", "", ""]);
+                worksheet.addRow(["Valor Liberado:", vLiberado, "", "", "", "", "", "", "", "", ""]);
+                worksheet.addRow(["Valor Utilizado:", vUtilizado, "", "", "", "", "", "", "", "", ""]);
+                worksheet.addRow(["Valor Disponível:", vDisponivel, "", "", "", "", "", "", "", "", ""]);
+                worksheet.addRow(["", "", "", "", "", "", "", "", "", "", ""]); // Linha vazia separadora
+
+                // Formatação do bloco financeiro
+                worksheet.mergeCells('A1:K1');
+                worksheet.getCell('A1').font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
+                worksheet.getCell('A1').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF545A5C' } };
+                worksheet.getCell('A1').alignment = { horizontal: 'center' };
+
+                ['A2', 'A3', 'A4'].forEach(cellRef => worksheet.getCell(cellRef).font = { bold: true });
+                worksheet.getCell('B2').numFmt = '"R$" #,##0.00';
+                worksheet.getCell('B3').numFmt = '"R$" #,##0.00';
+                worksheet.getCell('B4').numFmt = '"R$" #,##0.00';
+                worksheet.getCell('B4').font = { bold: true, color: { argb: vDisponivel < 0 ? 'FFB85C5C' : 'FF4B5836' } };
+
+                // --- CABEÇALHO DA TABELA ---
+                const cabecalho = [
+                    "ID Escala", "Data", "Turno Início", "Turno Término", "Missão",
+                    "Posto/Graduação", "Tipo", "Qtd Militares",
+                    "Valor Unit (R$)", "Subtotal Posto (R$)", "Custo Total (R$)"
+                ];
+                worksheet.addRow(cabecalho);
+
+                const COL_ID       = 1;
+                const COL_DATA     = 2;
+                const COL_INICIO   = 3;
+                const COL_TERMINO  = 4;
+                const COL_MISSAO   = 5;
+                const COL_CUSTO    = 11;
+
+                let linhaAtual = 7; // Cabeçalho está na linha 6 devido ao resumo superior
+
+                blocos.forEach(bloco => {
+                    const linhaInicioBloco = linhaAtual;
+
+                    bloco.linhas.forEach(item => {
+                        worksheet.addRow([
+                            bloco.id,
+                            bloco.data,
+                            bloco.turnoInicio,
+                            bloco.turnoTermino,
+                            bloco.missao,
+                            item.posto,
+                            item.tipo,
+                            item.qtd,
+                            item.vUnit,
+                            item.vTotal,
+                            bloco.custoTotal
+                        ]);
+                        linhaAtual++;
+                    });
+
+                    const linhaFimBloco = linhaAtual - 1;
+
+                    if (linhaFimBloco > linhaInicioBloco) {
+                        [COL_ID, COL_DATA, COL_INICIO, COL_TERMINO, COL_MISSAO, COL_CUSTO].forEach(col => {
+                            worksheet.mergeCells(linhaInicioBloco, col, linhaFimBloco, col);
+                        });
+                    }
+                });
+
+                // Estilo do Cabeçalho dos Dados
+                const linhaCabecalho = worksheet.getRow(6);
+                linhaCabecalho.eachCell(cell => {
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5A623' } };
+                    cell.font = { bold: true, color: { argb: 'FF000000' } };
+                    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+                    cell.border = {
+                        top: { style: 'thin' }, left: { style: 'thin' },
+                        bottom: { style: 'thin' }, right: { style: 'thin' }
+                    };
+                });
+                linhaCabecalho.height = 22;
+
+                // Estilo das Linhas de Dados
+                for (let r = 7; r <= linhaAtual - 1; r++) {
+                    const row = worksheet.getRow(r);
+                    for (let c = 1; c <= cabecalho.length; c++) {
+                        const cell = row.getCell(c);
+                        cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+                        cell.border = {
+                            top: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+                            left: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+                            bottom: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+                            right: { style: 'thin', color: { argb: 'FFCCCCCC' } }
+                        };
+                        if (c === COL_MISSAO) cell.alignment.horizontal = 'left';
+                        if (c === 9 || c === 10 || c === COL_CUSTO) {
+                            cell.numFmt = '"R$" #,##0.00';
+                        }
+                    }
+                }
+
+                const larguras = [12, 12, 13, 14, 30, 22, 12, 14, 16, 18, 16];
+                worksheet.columns.forEach((col, i) => { col.width = larguras[i] || 14; });
+
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob   = new Blob([buffer], {
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                });
+                const url = URL.createObjectURL(blob);
+                const a   = document.createElement("a");
+                a.href    = url;
+                a.download = `Relatorio_Escalas_${mesSelecionado}_${anoSelecionado}.xlsx`;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                btn.innerText = "📊 Extrair Dados das Escalas";
+                btn.disabled  = false;
+            })
+            .catch(err => {
+                mostrarToast("Falha ao gerar planilha.", 'erro');
+                console.error(err);
+                btn.innerText = "📊 Extrair Dados das Escalas";
+                btn.disabled  = false;
+            });
+    }
+
+    window.onload = function() {
+        inicializarFinanceiro();
+        carregarEscalas();
+    };
+</script>
+</body>
+</html>
